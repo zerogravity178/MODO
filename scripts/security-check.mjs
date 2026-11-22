@@ -814,8 +814,9 @@ async function main() {
         "8",
         "A не загружает файл в чужой модуль",
         "файл принят в папку с чужим module_id",
-        "Скорее всего миграция 005_security_hardening.sql ещё не применена: " +
-          "сейчас Storage проверяет только папку пользователя, но не владельца модуля."
+        "Загрузка в чужой модуль разрешена. Проверьте политику " +
+          "modo_images_insert_own, функцию owns_storage_path и наличие " +
+          "дополнительных permissive-политик на storage.objects"
       );
     }
   }
@@ -916,8 +917,8 @@ async function main() {
           "11",
           "Файл не открывается без авторизации",
           "публичный адрес отдаёт файл",
-          "Bucket стал публичным. В Supabase → Storage → modo-images " +
-            "выключите Public bucket и примените 005_security_hardening.sql."
+          "Bucket доступен публично. Проверьте настройку Public bucket " +
+            "для modo-images в Supabase Storage. Ожидаемое значение: false"
         );
       } else if (status === 0) {
         fail("11", "Файл не открывается без авторизации", "нет ответа от сервера");
