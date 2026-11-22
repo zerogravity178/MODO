@@ -54,7 +54,7 @@ export function RecordCard({
           }}
           aria-label="Удалить запись"
           title="Удалить запись"
-          className="absolute right-2 top-2 rounded-md p-1.5 text-neutral-500 opacity-0 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
+          className="absolute right-2 top-2 rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 opacity-0 transition hover:bg-red-50 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>

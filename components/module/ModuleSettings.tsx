@@ -197,7 +197,7 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
       <header className="space-y-5">
         <Link
           href={`/m/${module.id}`}
-          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
         >
           ← Назад к модулю
         </Link>

@@ -150,7 +150,7 @@ export function ModuleCard({
         card
       )}
 
-      <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition focus-within:opacity-100 group-hover:opacity-100">
+      <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
         {canDuplicate && (
           <button
             type="button"
@@ -158,7 +158,7 @@ export function ModuleCard({
             disabled={duplicating}
             aria-label={`Дублировать модуль «${name}»`}
             title="Дублировать"
-            className="rounded-md p-1.5 text-neutral-500 transition hover:bg-neutral-100 dark:text-neutral-400 hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:text-neutral-500"
+            className="rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 transition hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
           >
             <Copy className="h-4 w-4" />
           </button>
@@ -170,7 +170,7 @@ export function ModuleCard({
             onClick={openConfirm}
             aria-label={`Удалить модуль «${name}»`}
             title="Удалить модуль"
-            className="rounded-md p-1.5 text-neutral-500 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
+            className="rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:hover:bg-red-950/40 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </button>

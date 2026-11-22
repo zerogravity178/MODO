@@ -31,7 +31,7 @@ export function AppHeader({ email }: AppHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/80 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
+    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/80 pt-safe backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
       <div className="mx-auto flex w-full max-w-4xl items-center gap-3 px-5 py-3 sm:px-8">
         <Link
           href="/"

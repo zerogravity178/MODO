@@ -102,7 +102,7 @@ export default function LoginPage() {
           Нет аккаунта?{" "}
           <Link
             href="/register"
-            className="font-medium text-[#f97316] hover:underline"
+            className="inline-flex min-h-9 items-center font-medium text-[#f97316] hover:underline"
           >
             Зарегистрироваться
           </Link>

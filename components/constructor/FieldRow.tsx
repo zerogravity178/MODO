@@ -47,7 +47,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
           type="button"
           onClick={() => onRemove(field.key)}
           aria-label={`Удалить поле ${index + 1}`}
-          className="rounded-md p-1 text-neutral-500 transition hover:bg-neutral-100 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:text-neutral-500 dark:hover:bg-neutral-800"
+          className="rounded-md p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:text-neutral-400 dark:hover:bg-neutral-800 [@media(hover:none)]:p-2.5"
         >
           <X className="h-4 w-4" />
         </button>

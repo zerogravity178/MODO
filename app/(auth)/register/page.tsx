@@ -118,7 +118,7 @@ export default function RegisterPage() {
           Уже есть аккаунт?{" "}
           <Link
             href="/login"
-            className="font-medium text-[#f97316] hover:underline"
+            className="inline-flex min-h-9 items-center font-medium text-[#f97316] hover:underline"
           >
             Войти
           </Link>

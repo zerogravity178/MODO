@@ -58,7 +58,7 @@ type ModuleViewProps = {
 };
 
 const selectClass =
-  "flex h-9 w-full rounded-md border border-neutral-300 bg-white px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900";
+  "flex h-10 w-full rounded-md border border-neutral-300 bg-white px-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 sm:h-9 sm:text-sm dark:border-neutral-700 dark:bg-neutral-900";
 
 export function ModuleView({ module, fields, records }: ModuleViewProps) {
   const router = useRouter();
@@ -198,7 +198,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
       <header className="space-y-5">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
         >
           ← Назад
         </Link>
@@ -270,7 +270,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                     onClick={() => setView(tab.id)}
                     aria-pressed={view === tab.id}
                     className={cn(
-                      "flex items-center gap-1 rounded-md px-2.5 py-1 text-sm font-medium transition",
+                      "flex min-h-9 items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition",
                       view === tab.id
                         ? "bg-[#f97316] text-white"
                         : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
@@ -574,7 +574,7 @@ type RecordTableProps = {
 
 function RecordTable({ fields, items, onEdit, onDelete }: RecordTableProps) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+    <div className="relative overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
       <table className="w-full border-collapse text-sm">
         <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
           <tr>
@@ -636,7 +636,7 @@ function RecordTable({ fields, items, onEdit, onDelete }: RecordTableProps) {
                   }}
                   aria-label="Удалить запись"
                   title="Удалить запись"
-                  className="rounded-md p-1.5 text-neutral-500 opacity-0 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
+                  className="rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 opacity-0 transition hover:bg-red-50 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
