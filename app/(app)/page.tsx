@@ -59,7 +59,12 @@ export default async function HomePage() {
           <h2 className="text-lg font-semibold text-neutral-900">Мои модули</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {modules.map((module) => (
-              <ModuleCard key={module.id} name={module.name} icon={module.icon} />
+              <ModuleCard 
+                key={module.id} 
+                name={module.name} 
+                icon={module.icon} 
+                href={`/m/${module.id}`} 
+              />
             ))}
           </div>
         </section>
