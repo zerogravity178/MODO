@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Plus } from "lucide-react";
 
-import { ModuleCard, getModuleIcon } from "@/components/module/ModuleCard";
+import { ModuleCard } from "@/components/module/ModuleCard";
+import { getModuleIcon } from "@/components/module/module-icons";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -57,14 +59,29 @@ export default async function HomePage() {
 
       {hasModules ? (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Мои модули</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-neutral-900">
+              Мои модули
+            </h2>
+            <Button
+              asChild
+              size="sm"
+              className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+            >
+              <Link href="/m/new">
+                <Plus className="mr-1 h-4 w-4" />
+                Создать модуль
+              </Link>
+            </Button>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {modules.map((module) => (
-              <ModuleCard 
-                key={module.id} 
-                name={module.name} 
-                icon={module.icon} 
-                href={`/m/${module.id}`} 
+              <ModuleCard
+                key={module.id}
+                id={module.id}
+                name={module.name}
+                icon={module.icon}
+                href={`/m/${module.id}`}
               />
             ))}
           </div>
@@ -119,10 +136,12 @@ export default async function HomePage() {
 
           <Button
             asChild
-            variant="outline"
-            className="w-full border-dashed border-neutral-300 text-neutral-600 hover:border-[#f97316] hover:text-[#f97316]"
+            className="w-full bg-[#f97316] text-white hover:bg-[#ea6a0b]"
           >
-            <Link href="/m/new">Собрать свой модуль</Link>
+            <Link href="/m/new">
+              <Plus className="mr-1 h-4 w-4" />
+              Создать модуль
+            </Link>
           </Button>
           <p className="text-xs text-neutral-400">
             Назовите модуль, выберите иконку и поля — всё остальное настроите

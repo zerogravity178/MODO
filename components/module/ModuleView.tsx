@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Settings, Trash2 } from "lucide-react";
 
 import { RecordCard } from "@/components/module/RecordCard";
-import { getModuleIcon } from "@/components/module/ModuleCard";
+import { getModuleIcon } from "@/components/module/module-icons";
 import { RecordForm } from "@/components/record/RecordForm";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createClient } from "@/lib/supabase/client";
 import {
   formatFieldValue,
   parseRecordData,
@@ -40,6 +42,10 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
   );
   const [formOpen, setFormOpen] = useState(false);
 
+  const [pendingRecord, setPendingRecord] = useState<RecordRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const Icon = getModuleIcon(module.icon);
   const rows = records.map((record) => ({
     record,
@@ -48,6 +54,34 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
 
   function handleSaved() {
     setFormOpen(false);
+    router.refresh();
+  }
+
+  function askDeleteRecord(record: RecordRow) {
+    setDeleteError(null);
+    setPendingRecord(record);
+  }
+
+  async function confirmDeleteRecord() {
+    if (!pendingRecord) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("records")
+      .delete()
+      .eq("id", pendingRecord.id);
+
+    if (error) {
+      setDeleteError(error.message);
+      setDeleting(false);
+      return;
+    }
+
+    setDeleting(false);
+    setPendingRecord(null);
     router.refresh();
   }
 
@@ -71,13 +105,25 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
             </h1>
           </div>
 
-          <Button
-            onClick={() => setFormOpen(true)}
-            className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            Добавить
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" asChild>
+              <Link
+                href={`/m/${module.id}/settings`}
+                aria-label="Настройки модуля"
+                title="Настройки"
+              >
+                <Settings className="h-4 w-4" />
+              </Link>
+            </Button>
+
+            <Button
+              onClick={() => setFormOpen(true)}
+              className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Добавить
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-1 rounded-lg border border-neutral-200 p-1">
@@ -111,7 +157,12 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
       ) : view === "cards" ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map(({ record, data }) => (
-            <RecordCard key={record.id} fields={fields} data={data} />
+            <RecordCard
+              key={record.id}
+              fields={fields}
+              data={data}
+              onDelete={() => askDeleteRecord(record)}
+            />
           ))}
         </div>
       ) : (
@@ -125,13 +176,16 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                   </th>
                 ))}
                 <th className="px-3 py-2 font-medium">Создано</th>
+                <th className="w-10 px-3 py-2">
+                  <span className="sr-only">Действия</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {rows.map(({ record, data }) => (
                 <tr
                   key={record.id}
-                  className="border-t border-neutral-100 align-middle"
+                  className="group border-t border-neutral-100 align-middle"
                 >
                   {fields.map((field) => {
                     const value = data[field.id];
@@ -160,6 +214,17 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                       ? new Date(record.created_at).toLocaleDateString("ru-RU")
                       : "—"}
                   </td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => askDeleteRecord(record)}
+                      aria-label="Удалить запись"
+                      title="Удалить запись"
+                      className="rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -183,6 +248,23 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
           />
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={pendingRecord !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingRecord(null);
+            setDeleteError(null);
+          }
+        }}
+        title="Удалить запись?"
+        description="Запись будет удалена безвозвратно."
+        pending={deleting}
+        error={deleteError}
+        onConfirm={() => {
+          void confirmDeleteRecord();
+        }}
+      />
     </div>
   );
 }

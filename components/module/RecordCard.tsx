@@ -1,3 +1,7 @@
+"use client";
+
+import { Trash2 } from "lucide-react";
+
 import { formatFieldValue, type FieldDef } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -5,18 +9,41 @@ type RecordCardProps = {
   fields: FieldDef[];
   data: Record<string, unknown>;
   className?: string;
+  onDelete?: () => void;
 };
 
-export function RecordCard({ fields, data, className }: RecordCardProps) {
+export function RecordCard({
+  fields,
+  data,
+  className,
+  onDelete,
+}: RecordCardProps) {
   const preview = fields.slice(0, 3);
 
   return (
     <div
       className={cn(
-        "space-y-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#f97316]/50 hover:shadow-sm",
+        "group relative space-y-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#f97316]/50 hover:shadow-sm",
+        onDelete && "pr-10",
         className
       )}
     >
+      {onDelete && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Удалить запись"
+          title="Удалить запись"
+          className="absolute right-2 top-2 rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+
       {preview.length === 0 ? (
         <p className="text-sm text-neutral-500">У модуля нет полей</p>
       ) : (
