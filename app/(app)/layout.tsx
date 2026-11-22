@@ -21,7 +21,7 @@ export default async function AppLayout({
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       <AppHeader email={user.email ?? ""} />
 
-      <div className="mx-auto w-full max-w-4xl px-5 py-8 pb-safe sm:px-8 sm:py-12">
+      <div className="mx-auto w-full max-w-4xl px-5 py-8 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-8 sm:py-12 sm:pb-[calc(3rem+env(safe-area-inset-bottom))]">
         {children}
       </div>
     </div>
