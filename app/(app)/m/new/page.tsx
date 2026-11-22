@@ -156,16 +156,16 @@ export default function NewModulePage() {
       <header className="space-y-5">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316]"
+          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
         >
           ← Назад
         </Link>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-neutral-900">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
             Новый модуль
           </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             Задайте название, иконку и поля — записи добавите позже.
           </p>
         </div>
@@ -202,7 +202,7 @@ export default function NewModulePage() {
                     "flex h-12 w-12 items-center justify-center rounded-xl border text-2xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2",
                     selected
                       ? "border-[#f97316] bg-[#f97316]/10 ring-2 ring-[#f97316]/30"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      : "border-neutral-200 bg-white hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
                   )}
                 >
                   <span aria-hidden>{choice.emoji}</span>
@@ -220,7 +220,7 @@ export default function NewModulePage() {
         />
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {error}
           </p>
         )}

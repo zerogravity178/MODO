@@ -54,14 +54,14 @@ export function RecordCard({
           }}
           aria-label="Удалить запись"
           title="Удалить запись"
-          className="absolute right-2 top-2 rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+          className="absolute right-2 top-2 rounded-md p-1.5 text-neutral-500 opacity-0 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       )}
 
       {preview.length === 0 ? (
-        <p className="text-sm text-neutral-500">У модуля нет полей</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">У модуля нет полей</p>
       ) : (
         preview.map((field) => {
           const raw = data[field.id];
@@ -70,7 +70,7 @@ export function RecordCard({
 
           return (
             <div key={field.id} className="space-y-1">
-              <p className="text-xs uppercase tracking-wide text-neutral-400">
+              <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                 {field.label}
               </p>
 

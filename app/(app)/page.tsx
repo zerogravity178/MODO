@@ -157,7 +157,7 @@ export default async function HomePage() {
               Создать модуль
             </Link>
           </Button>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
             Назовите модуль, выберите иконку и поля — всё остальное настроите
             внутри.
           </p>

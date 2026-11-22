@@ -158,7 +158,7 @@ export function ModuleCard({
             disabled={duplicating}
             aria-label={`Дублировать модуль «${name}»`}
             title="Дублировать"
-            className="rounded-md p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-md p-1.5 text-neutral-500 transition hover:bg-neutral-100 dark:text-neutral-400 hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:text-neutral-500"
           >
             <Copy className="h-4 w-4" />
           </button>
@@ -170,7 +170,7 @@ export function ModuleCard({
             onClick={openConfirm}
             aria-label={`Удалить модуль «${name}»`}
             title="Удалить модуль"
-            className="rounded-md p-1.5 text-neutral-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:hover:bg-red-950/40 dark:hover:text-red-400"
+            className="rounded-md p-1.5 text-neutral-500 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -178,7 +178,7 @@ export function ModuleCard({
       </div>
 
       {error && !confirmOpen && (
-        <p role="alert" className="mt-1 text-xs text-red-600">
+        <p role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
       )}

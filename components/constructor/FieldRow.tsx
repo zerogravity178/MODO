@@ -38,16 +38,16 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
   const optionsId = `field-options-${field.key}`;
 
   return (
-    <div className="space-y-2 rounded-xl border border-neutral-200 bg-white p-3">
+    <div className="space-y-2 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
           Поле {index + 1}
         </p>
         <button
           type="button"
           onClick={() => onRemove(field.key)}
           aria-label={`Удалить поле ${index + 1}`}
-          className="rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]"
+          className="rounded-md p-1 text-neutral-500 transition hover:bg-neutral-100 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:text-neutral-500 dark:hover:bg-neutral-800"
         >
           <X className="h-4 w-4" />
         </button>
@@ -57,7 +57,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
         <div className="space-y-1">
           <Label
             htmlFor={labelId}
-            className="text-xs font-normal text-neutral-500"
+            className="text-xs font-normal text-neutral-500 dark:text-neutral-400"
           >
             Название
           </Label>
@@ -75,7 +75,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
         <div className="space-y-1">
           <Label
             htmlFor={typeId}
-            className="text-xs font-normal text-neutral-500"
+            className="text-xs font-normal text-neutral-500 dark:text-neutral-400"
           >
             Тип
           </Label>
@@ -85,7 +85,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
             onChange={(event) =>
               onChange(field.key, { type: event.target.value as FieldType })
             }
-            className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2"
+            className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900"
           >
             {FIELD_TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -100,7 +100,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
         <div className="space-y-1">
           <Label
             htmlFor={optionsId}
-            className="text-xs font-normal text-neutral-500"
+            className="text-xs font-normal text-neutral-500 dark:text-neutral-400"
           >
             Варианты через запятую
           </Label>

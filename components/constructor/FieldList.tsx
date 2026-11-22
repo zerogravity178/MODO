@@ -21,14 +21,14 @@ export function FieldList({
   return (
     <section className="space-y-3">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-neutral-900">Поля модуля</h2>
-        <p className="text-sm text-neutral-500">
+        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Поля модуля</h2>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           Что будет храниться в каждой записи.
         </p>
       </div>
 
       {fields.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500">
+        <p className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
           Пока нет полей — добавьте хотя бы одно.
         </p>
       ) : (
@@ -49,7 +49,7 @@ export function FieldList({
         type="button"
         variant="outline"
         onClick={onAdd}
-        className="w-full border-dashed border-neutral-300 text-neutral-600 hover:border-[#f97316] hover:text-[#f97316]"
+        className="w-full border-dashed border-neutral-300 text-neutral-600 hover:border-[#f97316] hover:text-[#f97316] dark:border-neutral-700 dark:text-neutral-300"
       >
         <Plus className="mr-1 h-4 w-4" />
         Добавить поле

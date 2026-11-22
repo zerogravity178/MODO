@@ -248,7 +248,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative min-w-[12rem] flex-1">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400" />
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -387,7 +387,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                   variant="ghost"
                   size="sm"
                   onClick={resetFilters}
-                  className="h-9 text-neutral-500"
+                  className="h-9 text-neutral-500 dark:text-neutral-400"
                 >
                   <X className="h-4 w-4" />
                   Сбросить
@@ -407,7 +407,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                 { label: "Максимум", value: summary.max },
               ].map((cell) => (
                 <div key={cell.label} className="space-y-0.5">
-                  <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                     {cell.label}
                   </p>
                   <p className="text-lg font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
@@ -418,7 +418,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
             </div>
 
             {items.length !== total && (
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 Считано по {items.length} из {total} — с учётом поиска и фильтра.
               </p>
             )}
@@ -464,7 +464,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
                 <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-neutral-200 pb-2 dark:border-neutral-800">
                   <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
                     {group.value}
-                    <span className="ml-2 text-xs font-normal text-neutral-400">
+                    <span className="ml-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">
                       {group.items.length}
                     </span>
                   </h2>
@@ -621,7 +621,7 @@ function RecordTable({ fields, items, onEdit, onDelete }: RecordTableProps) {
                   </td>
                 );
               })}
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-400">
+              <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
                 {record.created_at
                   ? new Date(record.created_at).toLocaleDateString("ru-RU")
                   : "—"}
@@ -636,7 +636,7 @@ function RecordTable({ fields, items, onEdit, onDelete }: RecordTableProps) {
                   }}
                   aria-label="Удалить запись"
                   title="Удалить запись"
-                  className="rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                  className="rounded-md p-1.5 text-neutral-500 opacity-0 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:text-neutral-500"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
