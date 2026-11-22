@@ -11,18 +11,36 @@ import type { FieldDef } from "@/lib/types";
 type RecordFormProps = {
   moduleId: string;
   fields: FieldDef[];
+  /** Передано — форма правит существующую запись вместо создания новой. */
+  recordId?: string;
+  initialValues?: Record<string, unknown>;
   onSaved?: () => void;
   onCancel?: () => void;
 };
 
+/** Приводит значение из jsonb к строке для контролируемого input. */
+function toInputString(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return "";
+}
+
 export function RecordForm({
   moduleId,
   fields,
+  recordId,
+  initialValues,
   onSaved,
   onCancel,
 }: RecordFormProps) {
+  const isEdit = Boolean(recordId);
+
   const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(fields.map((field) => [field.id, ""]))
+    Object.fromEntries(
+      fields.map((field) => [field.id, toInputString(initialValues?.[field.id])])
+    )
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -65,6 +83,24 @@ export function RecordForm({
     setSaving(true);
 
     const supabase = createClient();
+
+    if (isEdit) {
+      const { error: updateError } = await supabase
+        .from("records")
+        .update({ data })
+        .eq("id", recordId);
+
+      if (updateError) {
+        setError(updateError.message);
+        setSaving(false);
+        return;
+      }
+
+      setSaving(false);
+      onSaved?.();
+      return;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -111,7 +147,7 @@ export function RecordForm({
                 name={field.id}
                 value={value}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900"
               >
                 <option value="">— не выбрано —</option>
                 {(field.options ?? []).map((option) => (
@@ -137,7 +173,7 @@ export function RecordForm({
                   <img
                     src={value}
                     alt="Превью"
-                    className="h-32 w-full rounded-md border border-neutral-200 object-cover"
+                    className="h-32 w-full rounded-md border border-neutral-200 object-cover dark:border-neutral-800"
                   />
                 )}
               </>
@@ -174,7 +210,13 @@ export function RecordForm({
           disabled={saving}
           className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
         >
-          {saving ? "Сохраняем…" : "Сохранить"}
+          {saving
+            ? isEdit
+              ? "Сохраняем…"
+              : "Сохраняем…"
+            : isEdit
+              ? "Сохранить"
+              : "Добавить"}
         </Button>
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>

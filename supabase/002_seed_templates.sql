@@ -46,6 +46,46 @@ values
     ]$json$::jsonb,
     'cards',
     3
+  ),
+  (
+    '44444444-4444-4444-8444-444444444444',
+    'Книги',
+    'clipboard-list',
+    $json$[
+      {"id":"title","label":"Название","type":"text","required":true},
+      {"id":"author","label":"Автор","type":"text"},
+      {"id":"pages","label":"Страниц","type":"number"},
+      {"id":"status","label":"Статус","type":"select","options":["Хочу прочитать","Читаю","Прочитано"]},
+      {"id":"cover","label":"Обложка","type":"image"}
+    ]$json$::jsonb,
+    'cards',
+    4
+  ),
+  (
+    '55555555-5555-4555-8555-555555555555',
+    'Привычки',
+    'check-square',
+    $json$[
+      {"id":"title","label":"Привычка","type":"text","required":true},
+      {"id":"frequency","label":"Частота","type":"select","options":["Каждый день","Через день","Раз в неделю"]},
+      {"id":"started","label":"Начал","type":"date"},
+      {"id":"streak","label":"Серия, дней","type":"number"}
+    ]$json$::jsonb,
+    'table',
+    5
+  ),
+  (
+    '66666666-6666-4666-8666-666666666666',
+    'Вишлист',
+    'box',
+    $json$[
+      {"id":"name","label":"Что хочу","type":"text","required":true},
+      {"id":"price","label":"Примерная цена","type":"number"},
+      {"id":"priority","label":"Приоритет","type":"select","options":["Очень","Средне","Когда-нибудь"]},
+      {"id":"link","label":"Ссылка","type":"text"}
+    ]$json$::jsonb,
+    'cards',
+    6
   )
 on conflict (id) do update
   set name         = excluded.name,

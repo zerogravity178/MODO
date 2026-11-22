@@ -54,7 +54,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="border-neutral-200 shadow-sm">
+    <Card className="border-neutral-200 shadow-sm dark:border-neutral-800">
       <CardHeader className="space-y-1">
         <div className="mb-2 h-1 w-10 rounded-full bg-[#f97316]" />
         <CardTitle className="text-2xl">Регистрация</CardTitle>
@@ -114,7 +114,7 @@ export default function RegisterPage() {
           </p>
         )}
 
-        <p className="mt-6 text-sm text-neutral-500">
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
           Уже есть аккаунт?{" "}
           <Link
             href="/login"

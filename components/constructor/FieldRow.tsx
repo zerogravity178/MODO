@@ -9,6 +9,8 @@ import type { FieldType } from "@/lib/types";
 export type DraftField = {
   /** Стабильный ключ строки в интерфейсе — в базу не попадает. */
   key: number;
+  /** id поля в jsonb. Есть только у существующих полей модуля. */
+  id?: string;
   label: string;
   type: FieldType;
   /** «Еда, Транспорт» — разбирается в options уже при сохранении. */

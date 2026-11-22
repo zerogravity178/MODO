@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AppHeader } from "@/components/app-header";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -17,7 +18,9 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
+      <AppHeader email={user.email ?? ""} />
+
       <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         {children}
       </div>

@@ -28,6 +28,11 @@ function formatToday(now: Date) {
   return `${date}, ${weekday}`;
 }
 
+/** Вложенный count приходит как [{ count: n }] — достаём число. */
+function readCount(row: { records?: { count: number }[] | null }) {
+  return row.records?.[0]?.count ?? 0;
+}
+
 export default async function HomePage() {
   const supabase = createClient();
 
@@ -40,7 +45,10 @@ export default async function HomePage() {
   }
 
   const [modulesResult, templatesResult] = await Promise.all([
-    supabase.from("modules").select().order("created_at", { ascending: false }),
+    supabase
+      .from("modules")
+      .select("*, records(count)")
+      .order("created_at", { ascending: false }),
     supabase.from("templates").select().order("sort_order"),
   ]);
 
@@ -54,13 +62,15 @@ export default async function HomePage() {
         <p className="text-sm font-medium text-[#f97316]">
           {formatToday(new Date())}
         </p>
-        <p className="text-xs text-neutral-500">Твои инструменты, твои правила</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          Твои инструменты, твои правила
+        </p>
       </header>
 
       {hasModules ? (
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-neutral-900">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
               Мои модули
             </h2>
             <Button
@@ -81,7 +91,9 @@ export default async function HomePage() {
                 id={module.id}
                 name={module.name}
                 icon={module.icon}
+                count={readCount(module)}
                 href={`/m/${module.id}`}
+                canDuplicate
               />
             ))}
           </div>
@@ -89,8 +101,10 @@ export default async function HomePage() {
       ) : (
         <section className="space-y-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-neutral-900">С чего начать</h2>
-            <p className="text-sm text-neutral-500">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              С чего начать
+            </h2>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Выберите готовый шаблон — модуль создастся сразу.
             </p>
           </div>
@@ -102,13 +116,13 @@ export default async function HomePage() {
               return (
                 <div
                   key={template.id}
-                  className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-4"
+                  className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <p className="truncate font-medium text-neutral-900">
+                    <p className="truncate font-medium text-neutral-900 dark:text-neutral-100">
                       {template.name}
                     </p>
                   </div>
@@ -128,7 +142,7 @@ export default async function HomePage() {
           </div>
 
           {templates.length === 0 && (
-            <p className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500">
+            <p className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
               Шаблоны не загружены. Выполните `002_seed_templates.sql` в Supabase
               SQL Editor.
             </p>

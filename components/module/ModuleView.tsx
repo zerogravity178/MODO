@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Settings, Trash2 } from "lucide-react";
+import {
+  ArrowDownUp,
+  Download,
+  LayoutGrid,
+  List,
+  Plus,
+  Search,
+  Settings,
+  Trash2,
+  X,
+} from "lucide-react";
 
 import { RecordCard } from "@/components/module/RecordCard";
 import { getModuleIcon } from "@/components/module/module-icons";
@@ -17,10 +27,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import {
+  formatNumber,
+  groupByField,
+  matchesQuery,
+  sortItems,
+  summarizeNumeric,
+  toCsv,
+  withData,
+  type SortDirection,
+  type SortKey,
+} from "@/lib/records";
+import {
   formatFieldValue,
-  parseRecordData,
   type FieldDef,
   type ModuleRow,
   type RecordRow,
@@ -35,35 +57,73 @@ type ModuleViewProps = {
   records: RecordRow[];
 };
 
+const selectClass =
+  "flex h-9 w-full rounded-md border border-neutral-300 bg-white px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900";
+
 export function ModuleView({ module, fields, records }: ModuleViewProps) {
   const router = useRouter();
+  const Icon = getModuleIcon(module.icon);
+
   const [view, setView] = useState<ViewMode>(
     module.default_view === "table" ? "table" : "cards"
   );
-  const [formOpen, setFormOpen] = useState(false);
 
-  const [pendingRecord, setPendingRecord] = useState<RecordRow | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<RecordRow | null>(null);
+
+  const [pendingDelete, setPendingDelete] = useState<RecordRow | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const Icon = getModuleIcon(module.icon);
-  const rows = records.map((record) => ({
-    record,
-    data: parseRecordData(record.data),
-  }));
+  const [query, setQuery] = useState("");
+  const [filterField, setFilterField] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+  const [groupField, setGroupField] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("__created_at__");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const selectFields = fields.filter(
+    (field) => field.type === "select" && (field.options ?? []).length > 0
+  );
+  const numberFields = fields.filter((field) => field.type === "number");
+
+  const items = useMemo(() => {
+    let result = withData(records);
+
+    if (query.trim()) {
+      result = result.filter((item) => matchesQuery(item, fields, query));
+    }
+
+    if (filterField && filterValue) {
+      result = result.filter(
+        (item) => formatFieldValue(item.data[filterField]) === filterValue
+      );
+    }
+
+    return sortItems(result, sortKey, sortDirection);
+  }, [records, fields, query, filterField, filterValue, sortKey, sortDirection]);
+
+  const groups = useMemo(() => {
+    if (!groupField) return null;
+    const field = fields.find((item) => item.id === groupField);
+    if (!field) return null;
+    return groupByField(items, field);
+  }, [items, groupField, fields]);
+
+  const summaryField = numberFields[0];
+  const summary = summaryField ? summarizeNumeric(items, summaryField.id) : null;
+
+  const filtersActive = Boolean(query || filterField || groupField);
+  const total = records.length;
 
   function handleSaved() {
     setFormOpen(false);
+    setEditing(null);
     router.refresh();
   }
 
-  function askDeleteRecord(record: RecordRow) {
-    setDeleteError(null);
-    setPendingRecord(record);
-  }
-
-  async function confirmDeleteRecord() {
-    if (!pendingRecord) return;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
 
     setDeleting(true);
     setDeleteError(null);
@@ -72,7 +132,7 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
     const { error } = await supabase
       .from("records")
       .delete()
-      .eq("id", pendingRecord.id);
+      .eq("id", pendingDelete.id);
 
     if (error) {
       setDeleteError(error.message);
@@ -81,16 +141,60 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
     }
 
     setDeleting(false);
-    setPendingRecord(null);
+    setPendingDelete(null);
     router.refresh();
   }
 
+  function resetFilters() {
+    setQuery("");
+    setFilterField("");
+    setFilterValue("");
+    setGroupField("");
+  }
+
+  function downloadCsv() {
+    const csv = toCsv(fields, records);
+    // BOM нужен, чтобы Excel открыл кириллицу не крякозябрами.
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${module.name.replace(/[\\/:*?"<>|]/g, "-")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function renderRecord(item: (typeof items)[number]) {
+    if (view === "cards") {
+      return (
+        <RecordCard
+          key={item.record.id}
+          fields={fields}
+          data={item.data}
+          onEdit={() => setEditing(item.record)}
+          onDelete={() => {
+            setDeleteError(null);
+            setPendingDelete(item.record);
+          }}
+        />
+      );
+    }
+
+    return null;
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header className="space-y-5">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316]"
+          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
         >
           ← Назад
         </Link>
@@ -100,9 +204,16 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
               <Icon className="h-5 w-5" />
             </span>
-            <h1 className="truncate text-2xl font-semibold text-neutral-900">
-              {module.name}
-            </h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+                {module.name}
+              </h1>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {total === 0
+                  ? "пока пусто"
+                  : `${formatNumber(total)} ${total === 1 ? "запись" : total < 5 ? "записи" : "записей"}`}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -117,7 +228,10 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
             </Button>
 
             <Button
-              onClick={() => setFormOpen(true)}
+              onClick={() => {
+                setEditing(null);
+                setFormOpen(true);
+              }}
               className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
             >
               <Plus className="mr-1 h-4 w-4" />
@@ -126,134 +240,304 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
           </div>
         </div>
 
-        <div className="flex gap-1 rounded-lg border border-neutral-200 p-1">
-          {(
-            [
-              { id: "cards", label: "Карточки" },
-              { id: "table", label: "Таблица" },
-            ] as const
-          ).map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setView(tab.id)}
-              className={cn(
-                "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition",
-                view === tab.id
-                  ? "bg-[#f97316] text-white"
-                  : "text-neutral-600 hover:bg-neutral-100"
+        {total > 0 && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-[12rem] flex-1">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Поиск по записям"
+                  className="h-9 pl-8 focus-visible:ring-[#f97316]"
+                />
+              </div>
+
+              <div className="flex gap-1 rounded-lg border border-neutral-200 p-1 dark:border-neutral-800">
+                {(
+                  [
+                    { id: "cards" as const, label: "Карточки", icon: LayoutGrid },
+                    { id: "table" as const, label: "Таблица", icon: List },
+                  ]
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setView(tab.id)}
+                    aria-pressed={view === tab.id}
+                    className={cn(
+                      "flex items-center gap-1 rounded-md px-2.5 py-1 text-sm font-medium transition",
+                      view === tab.id
+                        ? "bg-[#f97316] text-white"
+                        : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    )}
+                  >
+                    <tab.icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadCsv}
+                title="Скачать CSV"
+                className="h-9"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">CSV</span>
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {selectFields.length > 0 && (
+                <>
+                  <select
+                    value={filterField}
+                    onChange={(event) => {
+                      setFilterField(event.target.value);
+                      setFilterValue("");
+                    }}
+                    className={cn(selectClass, "w-auto min-w-[8rem]")}
+                    aria-label="Поле фильтра"
+                  >
+                    <option value="">Фильтр: все</option>
+                    {selectFields.map((field) => (
+                      <option key={field.id} value={field.id}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {filterField && (
+                    <select
+                      value={filterValue}
+                      onChange={(event) => setFilterValue(event.target.value)}
+                      className={cn(selectClass, "w-auto min-w-[8rem]")}
+                      aria-label="Значение фильтра"
+                    >
+                      <option value="">Любое</option>
+                      {(fields.find((field) => field.id === filterField)
+                        ?.options ?? []
+                      ).map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </>
               )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+
+              <select
+                value={sortKey}
+                onChange={(event) => {
+                  setSortKey(event.target.value);
+                  setSortDirection("asc");
+                }}
+                className={cn(selectClass, "w-auto min-w-[8rem]")}
+                aria-label="Сортировка"
+              >
+                <option value="__created_at__">По дате создания</option>
+                {fields.map((field) => (
+                  <option key={field.id} value={field.id}>
+                    {field.label}
+                  </option>
+                ))}
+              </select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setSortDirection((current) =>
+                    current === "asc" ? "desc" : "asc"
+                  )
+                }
+                title={sortDirection === "asc" ? "По возрастанию" : "По убыванию"}
+                className="h-9"
+              >
+                <ArrowDownUp className="h-4 w-4" />
+                {sortDirection === "asc" ? "А-Я" : "Я-А"}
+              </Button>
+
+              {selectFields.length > 0 && (
+                <select
+                  value={groupField}
+                  onChange={(event) => setGroupField(event.target.value)}
+                  className={cn(selectClass, "w-auto min-w-[8rem]")}
+                  aria-label="Группировка"
+                >
+                  <option value="">Без группировки</option>
+                  {selectFields.map((field) => (
+                    <option key={field.id} value={field.id}>
+                      По «{field.label}»
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {filtersActive && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetFilters}
+                  className="h-9 text-neutral-500"
+                >
+                  <X className="h-4 w-4" />
+                  Сбросить
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {summary && (
+          <div className="grid gap-2 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:grid-cols-4 dark:border-neutral-800 dark:bg-neutral-900/60">
+            {[
+              { label: summaryField.label, value: summary.sum },
+              { label: "Среднее", value: summary.average },
+              { label: "Минимум", value: summary.min },
+              { label: "Максимум", value: summary.max },
+            ].map((cell) => (
+              <div key={cell.label} className="space-y-0.5">
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  {cell.label}
+                </p>
+                <p className="text-lg font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
+                  {formatNumber(cell.value)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </header>
 
-      {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-neutral-200 p-6 text-center text-sm text-neutral-500">
-          Пока нет записей. Нажмите «Добавить», чтобы создать первую.
-        </p>
+      {total === 0 ? (
+        <EmptyState
+          icon={module.icon}
+          title="Пока нет записей"
+          description="Добавьте первую запись — она появится здесь."
+        >
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+            className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Добавить запись
+          </Button>
+        </EmptyState>
+      ) : items.length === 0 ? (
+        <EmptyState
+          title="Ничего не найдено"
+          description="Попробуйте изменить запрос или сбросить фильтры."
+        >
+          <Button variant="outline" onClick={resetFilters}>
+            Сбросить фильтры
+          </Button>
+        </EmptyState>
+      ) : groups ? (
+        <div className="space-y-8">
+          {groups.map((group) => {
+            const groupSummary = summaryField
+              ? summarizeNumeric(group.items, summaryField.id)
+              : null;
+
+            return (
+              <section key={group.value} className="space-y-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-neutral-200 pb-2 dark:border-neutral-800">
+                  <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    {group.value}
+                    <span className="ml-2 text-xs font-normal text-neutral-400">
+                      {group.items.length}
+                    </span>
+                  </h2>
+                  {groupSummary && (
+                    <p className="text-sm tabular-nums text-neutral-500 dark:text-neutral-400">
+                      {summaryField.label}: {formatNumber(groupSummary.sum)}
+                    </p>
+                  )}
+                </div>
+
+                {view === "cards" ? (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.items.map(renderRecord)}
+                  </div>
+                ) : (
+                  <RecordTable
+                    fields={fields}
+                    items={group.items}
+                    onEdit={setEditing}
+                    onDelete={(record) => {
+                      setDeleteError(null);
+                      setPendingDelete(record);
+                    }}
+                  />
+                )}
+              </section>
+            );
+          })}
+        </div>
       ) : view === "cards" ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map(({ record, data }) => (
-            <RecordCard
-              key={record.id}
-              fields={fields}
-              data={data}
-              onDelete={() => askDeleteRecord(record)}
-            />
-          ))}
+          {items.map(renderRecord)}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200">
-          <table className="w-full border-collapse text-sm">
-            <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
-              <tr>
-                {fields.map((field) => (
-                  <th key={field.id} className="px-3 py-2 font-medium">
-                    {field.label}
-                  </th>
-                ))}
-                <th className="px-3 py-2 font-medium">Создано</th>
-                <th className="w-10 px-3 py-2">
-                  <span className="sr-only">Действия</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ record, data }) => (
-                <tr
-                  key={record.id}
-                  className="group border-t border-neutral-100 align-middle"
-                >
-                  {fields.map((field) => {
-                    const value = data[field.id];
-                    const isImage =
-                      field.type === "image" &&
-                      typeof value === "string" &&
-                      value.startsWith("http");
-
-                    return (
-                      <td key={field.id} className="px-3 py-2 text-neutral-800">
-                        {isImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={value as string}
-                            alt={field.label}
-                            className="h-10 w-10 rounded object-cover"
-                          />
-                        ) : (
-                          formatFieldValue(value)
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-400">
-                    {record.created_at
-                      ? new Date(record.created_at).toLocaleDateString("ru-RU")
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <button
-                      type="button"
-                      onClick={() => askDeleteRecord(record)}
-                      aria-label="Удалить запись"
-                      title="Удалить запись"
-                      className="rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordTable
+          fields={fields}
+          items={items}
+          onEdit={setEditing}
+          onDelete={(record) => {
+            setDeleteError(null);
+            setPendingDelete(record);
+          }}
+        />
       )}
 
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      <Dialog
+        open={formOpen || editing !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setFormOpen(false);
+            setEditing(null);
+          }
+        }}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Новая запись</DialogTitle>
+            <DialogTitle>{editing ? "Изменить запись" : "Новая запись"}</DialogTitle>
             <DialogDescription>
               {module.name} · заполните поля и сохраните.
             </DialogDescription>
           </DialogHeader>
           <RecordForm
+            key={editing?.id ?? "new"}
             moduleId={module.id}
             fields={fields}
+            recordId={editing?.id}
+            initialValues={
+              editing
+                ? (withData([editing])[0]?.data ?? {})
+                : undefined
+            }
             onSaved={handleSaved}
-            onCancel={() => setFormOpen(false)}
+            onCancel={() => {
+              setFormOpen(false);
+              setEditing(null);
+            }}
           />
         </DialogContent>
       </Dialog>
 
       <ConfirmDialog
-        open={pendingRecord !== null}
+        open={pendingDelete !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setPendingRecord(null);
+            setPendingDelete(null);
             setDeleteError(null);
           }
         }}
@@ -262,9 +546,93 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
         pending={deleting}
         error={deleteError}
         onConfirm={() => {
-          void confirmDeleteRecord();
+          void confirmDelete();
         }}
       />
+    </div>
+  );
+}
+
+type RecordTableProps = {
+  fields: FieldDef[];
+  items: ReturnType<typeof withData>;
+  onEdit: (record: RecordRow) => void;
+  onDelete: (record: RecordRow) => void;
+};
+
+function RecordTable({ fields, items, onEdit, onDelete }: RecordTableProps) {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+      <table className="w-full border-collapse text-sm">
+        <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
+          <tr>
+            {fields.map((field) => (
+              <th key={field.id} className="px-3 py-2 font-medium">
+                {field.label}
+              </th>
+            ))}
+            <th className="px-3 py-2 font-medium">Создано</th>
+            <th className="w-10 px-3 py-2">
+              <span className="sr-only">Действия</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(({ record, data }) => (
+            <tr
+              key={record.id}
+              onClick={() => onEdit(record)}
+              className="group cursor-pointer border-t border-neutral-100 align-middle transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+            >
+              {fields.map((field) => {
+                const value = data[field.id];
+                const isImage =
+                  field.type === "image" &&
+                  typeof value === "string" &&
+                  value.startsWith("http");
+
+                return (
+                  <td
+                    key={field.id}
+                    className="px-3 py-2 text-neutral-800 dark:text-neutral-200"
+                  >
+                    {isImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={value as string}
+                        alt={field.label}
+                        className="h-10 w-10 rounded object-cover"
+                      />
+                    ) : (
+                      formatFieldValue(value)
+                    )}
+                  </td>
+                );
+              })}
+              <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-400">
+                {record.created_at
+                  ? new Date(record.created_at).toLocaleDateString("ru-RU")
+                  : "—"}
+              </td>
+              <td className="px-3 py-2 text-right">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onDelete(record);
+                  }}
+                  aria-label="Удалить запись"
+                  title="Удалить запись"
+                  className="rounded-md p-1.5 text-neutral-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
