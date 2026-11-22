@@ -153,7 +153,11 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
   }
 
   function downloadCsv() {
-    const csv = toCsv(fields, records);
+    // Экспортируем то, что сейчас видно: с учётом поиска, фильтра и сортировки.
+    const csv = toCsv(
+      fields,
+      items.map((item) => item.record)
+    );
     // BOM нужен, чтобы Excel открыл кириллицу не крякозябрами.
     const blob = new Blob(["\uFEFF" + csv], {
       type: "text/csv;charset=utf-8;",
@@ -394,22 +398,30 @@ export function ModuleView({ module, fields, records }: ModuleViewProps) {
         )}
 
         {summary && (
-          <div className="grid gap-2 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:grid-cols-4 dark:border-neutral-800 dark:bg-neutral-900/60">
-            {[
-              { label: summaryField.label, value: summary.sum },
-              { label: "Среднее", value: summary.average },
-              { label: "Минимум", value: summary.min },
-              { label: "Максимум", value: summary.max },
-            ].map((cell) => (
-              <div key={cell.label} className="space-y-0.5">
-                <p className="text-xs uppercase tracking-wide text-neutral-400">
-                  {cell.label}
-                </p>
-                <p className="text-lg font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
-                  {formatNumber(cell.value)}
-                </p>
-              </div>
-            ))}
+          <div className="space-y-1">
+            <div className="grid gap-2 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:grid-cols-4 dark:border-neutral-800 dark:bg-neutral-900/60">
+              {[
+                { label: `Сумма · ${summaryField.label}`, value: summary.sum },
+                { label: "Среднее", value: summary.average },
+                { label: "Минимум", value: summary.min },
+                { label: "Максимум", value: summary.max },
+              ].map((cell) => (
+                <div key={cell.label} className="space-y-0.5">
+                  <p className="text-xs uppercase tracking-wide text-neutral-400">
+                    {cell.label}
+                  </p>
+                  <p className="text-lg font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
+                    {formatNumber(cell.value)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {items.length !== total && (
+              <p className="text-xs text-neutral-400">
+                Считано по {items.length} из {total} — с учётом поиска и фильтра.
+              </p>
+            )}
           </div>
         )}
       </header>

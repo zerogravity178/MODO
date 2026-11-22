@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 
 import { FieldList } from "@/components/constructor/FieldList";
 import type { DraftField } from "@/components/constructor/FieldRow";
@@ -290,7 +289,6 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
           disabled={saving}
           className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
         >
-          <Plus className="mr-1 hidden h-4 w-4" />
           {saving ? "Сохраняем…" : "Сохранить"}
         </Button>
       </form>

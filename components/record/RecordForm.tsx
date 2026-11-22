@@ -211,9 +211,7 @@ export function RecordForm({
           className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
         >
           {saving
-            ? isEdit
-              ? "Сохраняем…"
-              : "Сохраняем…"
+            ? "Сохраняем…"
             : isEdit
               ? "Сохранить"
               : "Добавить"}
