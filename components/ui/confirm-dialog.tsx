@@ -43,7 +43,7 @@ export function ConfirmDialog({
         </DialogHeader>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
@@ -61,7 +61,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={pending}
-            className="bg-red-600 text-white hover:bg-red-700"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {pending ? pendingLabel : confirmLabel}
           </Button>

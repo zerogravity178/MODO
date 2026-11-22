@@ -3,7 +3,8 @@
    пользователя и запросы к Supabase всегда идут в сеть: иначе после смены
    аккаунта человек увидит чужую закэшированную страницу. */
 
-const VERSION = "v3";
+/* v4 — сменилась палитра MODO 2.0, старый кэш стилей надо выбросить. */
+const VERSION = "v4";
 const STATIC_CACHE = `modo-static-${VERSION}`;
 const OFFLINE_URL = "/offline";
 
@@ -16,7 +17,7 @@ const PRECACHE = [
 ];
 
 /** Минимальная страница на случай, если /offline не оказался в кэше. */
-const FALLBACK_HTML = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Нет сети — modo</title><style>html,body{margin:0;height:100%}body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;box-sizing:border-box;text-align:center;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#fff;color:#171717}@media (prefers-color-scheme:dark){body{background:#0a0a0a;color:#f5f5f5}}h1{font-size:20px;margin:0}p{font-size:14px;color:#737373;max-width:20rem;margin:0}a{margin-top:8px;padding:8px 16px;border-radius:8px;background:#f97316;color:#fff;text-decoration:none;font-size:14px;font-weight:500}</style></head><body><div style="font-size:28px">📴</div><h1>Нет подключения</h1><p>modo не смог связаться с сервером. Проверьте интернет и попробуйте снова — данные никуда не делись.</p><a href="/">Повторить</a></body></html>`;
+const FALLBACK_HTML = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Нет сети — modo</title><style>:root{--bg:#fbfaf7;--fg:#101214;--muted:#5c6260;--accent:#8c6538;--accent-fg:#ffffff}@media (prefers-color-scheme:dark){:root{--bg:#101214;--fg:#f1f0ec;--muted:#929796;--accent:#c49a6c;--accent-fg:#101214}}html,body{margin:0;height:100%}body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;box-sizing:border-box;text-align:center;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg)}h1{font-size:20px;margin:0}p{font-size:14px;color:var(--muted);max-width:20rem;margin:0}a{margin-top:8px;padding:8px 16px;border-radius:8px;background:var(--accent);color:var(--accent-fg);text-decoration:none;font-size:14px;font-weight:500}</style></head><body><div style="font-size:28px">📴</div><h1>Нет подключения</h1><p>modo не смог связаться с сервером. Проверьте интернет и попробуйте снова — данные никуда не делись.</p><a href="/">Повторить</a></body></html>`;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

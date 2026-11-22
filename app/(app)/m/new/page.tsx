@@ -127,16 +127,16 @@ export default function NewModulePage() {
       <header className="space-y-5">
         <Link
           href="/"
-          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
         >
           ← Назад
         </Link>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+          <h1 className="text-2xl font-semibold text-foreground">
             Новый модуль
           </h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="text-sm text-muted-foreground">
             Задайте название, иконку и поля — записи добавите позже.
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function NewModulePage() {
             autoFocus
             placeholder="Например, Расходы"
             onChange={(event) => setName(event.target.value)}
-            className="focus-visible:ring-[#f97316]"
+            className="focus-visible:ring-ring"
           />
         </section>
 
@@ -170,10 +170,10 @@ export default function NewModulePage() {
                   aria-pressed={selected}
                   onClick={() => setIcon(choice.icon)}
                   className={cn(
-                    "flex h-12 w-12 items-center justify-center rounded-xl border text-2xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2",
+                    "flex h-12 w-12 items-center justify-center rounded-xl border text-2xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     selected
-                      ? "border-[#f97316] bg-[#f97316]/10 ring-2 ring-[#f97316]/30"
-                      : "border-neutral-200 bg-white hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                      : "border-border bg-card hover:border-primary"
                   )}
                 >
                   <span aria-hidden>{choice.emoji}</span>
@@ -211,7 +211,7 @@ export default function NewModulePage() {
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
@@ -220,7 +220,7 @@ export default function NewModulePage() {
           <Button
             type="submit"
             disabled={saving}
-            className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+            className="bg-primary text-primary-foreground hover:bg-primary-hover"
           >
             {saving ? "Создаём…" : "Создать модуль"}
           </Button>

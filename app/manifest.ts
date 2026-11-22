@@ -11,8 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],
-    background_color: "#ffffff",
-    theme_color: "#f97316",
+    // Основная тема modo — тёмная, поэтому и заставка тёмная.
+    background_color: "#101214",
+    theme_color: "#101214",
     lang: "ru",
     dir: "ltr",
     orientation: "portrait-primary",

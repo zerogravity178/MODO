@@ -59,7 +59,7 @@ type ModuleViewProps = {
 };
 
 const selectClass =
-  "flex h-10 w-full rounded-md border border-neutral-300 bg-white px-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900 sm:h-9 sm:text-sm";
+  "flex h-10 w-full rounded-md border border-border-strong bg-card px-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:text-sm";
 
 /** Поля, по которым имеет смысл фильтровать: мало вариантов, легко выбрать. */
 function filterableFields(fields: FieldDef[]): FieldDef[] {
@@ -170,21 +170,21 @@ export function ModuleView({
       <header className="space-y-4">
         <Link
           href="/"
-          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
         >
           ← Назад
         </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Icon className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="truncate text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+              <h1 className="truncate text-2xl font-semibold text-foreground">
                 {module.name}
               </h1>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-xs text-muted-foreground">
                 {total === 0
                   ? "пока пусто"
                   : `${total} ${plural(total, "запись", "записи", "записей")}`}
@@ -205,7 +205,7 @@ export function ModuleView({
 
             <Button
               onClick={openCreate}
-              className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+              className="bg-primary text-primary-foreground hover:bg-primary-hover"
             >
               <Plus className="mr-1 h-4 w-4" />
               Добавить
@@ -215,7 +215,7 @@ export function ModuleView({
 
         {total > 0 && (
           <>
-            <div className="flex gap-1 rounded-lg border border-neutral-200 p-1 dark:border-neutral-800 sm:w-fit">
+            <div className="flex gap-1 rounded-lg border border-border p-1 sm:w-fit">
               {(
                 [
                   { id: "cards" as const, label: "Карточки", icon: LayoutGrid },
@@ -230,8 +230,8 @@ export function ModuleView({
                   className={cn(
                     "flex min-h-9 flex-1 items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition sm:flex-none",
                     view === tab.id
-                      ? "bg-[#f97316] text-white"
-                      : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent"
                   )}
                 >
                   <tab.icon className="h-3.5 w-3.5" />
@@ -242,14 +242,14 @@ export function ModuleView({
 
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Поиск по записям"
                   aria-label="Поиск по записям"
-                  className="h-10 w-full rounded-md border border-neutral-300 bg-white pl-9 pr-2 text-base text-neutral-900 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400 sm:h-9 sm:text-sm"
+                  className="h-10 w-full rounded-md border border-border-strong bg-card pl-9 pr-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:text-sm"
                 />
               </div>
 
@@ -259,16 +259,16 @@ export function ModuleView({
                 aria-expanded={panelOpen}
                 aria-controls="filters-panel"
                 className={cn(
-                  "flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 sm:h-9",
+                  "flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9",
                   activeFilters > 0
-                    ? "border-[#f97316] text-[#f97316]"
-                    : "border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600"
+                    ? "border-primary text-primary"
+                    : "border-border-strong text-muted-foreground hover:border-primary"
                 )}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="hidden sm:inline">Фильтры</span>
                 {activeFilters > 0 && (
-                  <span className="rounded-full bg-[#f97316] px-1.5 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
                     {activeFilters}
                   </span>
                 )}
@@ -278,11 +278,11 @@ export function ModuleView({
             {panelOpen && (
               <div
                 id="filters-panel"
-                className="space-y-3 rounded-xl border border-neutral-200 p-3 dark:border-neutral-800"
+                className="space-y-3 rounded-xl border border-border p-3"
               >
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="space-y-1">
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs text-muted-foreground">
                       Сортировка
                     </span>
                     <select
@@ -300,7 +300,7 @@ export function ModuleView({
                   </label>
 
                   <div className="space-y-1">
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs text-muted-foreground">
                       Направление
                     </span>
                     <button
@@ -310,7 +310,7 @@ export function ModuleView({
                           current === "asc" ? "desc" : "asc"
                         )
                       }
-                      className="flex h-10 w-full items-center justify-center gap-1.5 rounded-md border border-neutral-300 px-2 text-sm text-neutral-700 transition hover:border-[#f97316] hover:text-[#f97316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:text-neutral-200 sm:h-9"
+                      className="flex h-10 w-full items-center justify-center gap-1.5 rounded-md border border-border-strong px-2 text-sm text-foreground transition hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9"
                     >
                       <ArrowDownUp className="h-4 w-4" />
                       {sortDirection === "asc" ? "По возрастанию" : "По убыванию"}
@@ -322,7 +322,7 @@ export function ModuleView({
                   <div className="grid gap-2 sm:grid-cols-2">
                     {filterableFields(fields).map((field) => (
                       <label key={field.id} className="space-y-1">
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        <span className="text-xs text-muted-foreground">
                           {field.label}
                         </span>
                         <select
@@ -351,7 +351,7 @@ export function ModuleView({
                 <button
                   type="button"
                   onClick={resetAll}
-                  className="inline-flex min-h-9 items-center gap-1 text-xs text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+                  className="inline-flex min-h-9 items-center gap-1 text-xs text-muted-foreground transition hover:text-primary"
                 >
                   <X className="h-3.5 w-3.5" />
                   Сбросить
@@ -360,7 +360,7 @@ export function ModuleView({
             )}
 
             {filtersActive && (
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-xs text-muted-foreground">
                 Найдено: {visible.length} из {total}
               </p>
             )}
@@ -376,7 +376,7 @@ export function ModuleView({
         >
           <Button
             onClick={openCreate}
-            className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+            className="bg-primary text-primary-foreground hover:bg-primary-hover"
           >
             <Plus className="mr-1 h-4 w-4" />
             Добавить запись
@@ -495,9 +495,9 @@ function RecordTable({
   onDelete,
 }: RecordTableProps) {
   return (
-    <div className="relative overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+    <div className="relative overflow-x-auto rounded-xl border border-border">
       <table className="w-full border-collapse text-sm">
-        <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
+        <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground dark:bg-card">
           <tr>
             {fields.map((field) => (
               <th key={field.id} className="px-3 py-2 font-medium">
@@ -515,7 +515,7 @@ function RecordTable({
             <tr
               key={record.id}
               onClick={() => onEdit(record)}
-              className="group cursor-pointer border-t border-neutral-100 align-middle transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+              className="group cursor-pointer border-t border-border align-middle transition hover:bg-accent dark:hover:bg-secondary"
             >
               {fields.map((field) => {
                 const value = data[field.id];
@@ -530,7 +530,7 @@ function RecordTable({
                 return (
                   <td
                     key={field.id}
-                    className="px-3 py-2 text-neutral-800 dark:text-neutral-200"
+                    className="px-3 py-2 text-foreground"
                   >
                     {src ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -540,7 +540,7 @@ function RecordTable({
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : field.type === "image" && value ? (
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <span className="text-xs text-muted-foreground">
                         файл
                       </span>
                     ) : (
@@ -549,7 +549,7 @@ function RecordTable({
                   </td>
                 );
               })}
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
+              <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                 {record.created_at
                   ? new Date(record.created_at).toLocaleDateString("ru-RU")
                   : "—"}
@@ -564,7 +564,7 @@ function RecordTable({
                   }}
                   aria-label="Удалить запись"
                   title="Удалить запись"
-                  className="rounded-md p-2 text-neutral-500 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
+                  className="rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 dark:hover:bg-danger/15 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

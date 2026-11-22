@@ -85,10 +85,10 @@ export default async function HomePage() {
   return (
     <main className="space-y-10">
       <header className="space-y-1">
-        <p className="text-sm font-medium text-[#f97316]">
+        <p className="text-sm font-medium text-primary">
           {formatToday(new Date())}
         </p>
-        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+        <p className="text-xs text-muted-foreground">
           Твои инструменты, твои правила
         </p>
       </header>
@@ -96,7 +96,7 @@ export default async function HomePage() {
       {hasModules ? (
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+            <h2 className="text-lg font-semibold text-foreground">
               Мои модули
             </h2>
             <div className="flex flex-wrap items-center gap-2">
@@ -104,7 +104,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 size="sm"
-                className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+                className="bg-primary text-primary-foreground hover:bg-primary-hover"
               >
                 <Link href="/m/new">
                   <Plus className="mr-1 h-4 w-4" />
@@ -130,10 +130,10 @@ export default async function HomePage() {
       ) : (
         <section className="space-y-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+            <h2 className="text-lg font-semibold text-foreground">
               С чего начать
             </h2>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="text-sm text-muted-foreground">
               Выберите готовый шаблон — модуль создастся сразу.
             </p>
           </div>
@@ -145,13 +145,13 @@ export default async function HomePage() {
               return (
                 <div
                   key={template.id}
-                  className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+                  className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <p className="truncate font-medium text-neutral-900 dark:text-neutral-100">
+                    <p className="truncate font-medium text-foreground">
                       {template.name}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export default async function HomePage() {
                     <Button
                       type="submit"
                       size="sm"
-                      className="w-full bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
                     >
                       Использовать
                     </Button>
@@ -171,7 +171,7 @@ export default async function HomePage() {
           </div>
 
           {templates.length === 0 && (
-            <p className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+            <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
               Шаблоны не загружены. Выполните `002_seed_templates.sql` в Supabase
               SQL Editor.
             </p>
@@ -179,14 +179,14 @@ export default async function HomePage() {
 
           <Button
             asChild
-            className="w-full bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
           >
             <Link href="/m/new">
               <Plus className="mr-1 h-4 w-4" />
               Создать модуль
             </Link>
           </Button>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          <p className="text-xs text-muted-foreground">
             Назовите модуль, выберите иконку и поля — всё остальное настроите
             внутри.
           </p>

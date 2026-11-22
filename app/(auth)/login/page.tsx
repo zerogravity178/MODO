@@ -45,9 +45,9 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-neutral-200 shadow-sm dark:border-neutral-800">
+    <Card className="border-border shadow-sm">
       <CardHeader className="space-y-1">
-        <div className="mb-2 h-1 w-10 rounded-full bg-[#f97316]" />
+        <div className="mb-2 h-1 w-10 rounded-full bg-primary" />
         <CardTitle className="text-2xl">Вход</CardTitle>
         <CardDescription>Войдите, чтобы открыть свои модули.</CardDescription>
       </CardHeader>
@@ -64,7 +64,7 @@ export default function LoginPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="focus-visible:ring-[#f97316]"
+              className="focus-visible:ring-ring"
             />
           </div>
 
@@ -79,30 +79,30 @@ export default function LoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="focus-visible:ring-[#f97316]"
+              className="focus-visible:ring-ring"
             />
           </div>
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#f97316] text-white hover:bg-[#ea6a0b] focus-visible:ring-[#f97316]"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring"
           >
             {loading ? "Входим…" : "Войти"}
           </Button>
         </form>
 
         {error && (
-          <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="mt-4 text-sm text-danger">
             {error}
           </p>
         )}
 
-        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mt-6 text-sm text-muted-foreground">
           Нет аккаунта?{" "}
           <Link
             href="/register"
-            className="inline-flex min-h-9 items-center font-medium text-[#f97316] hover:underline"
+            className="inline-flex min-h-9 items-center font-medium text-primary hover:underline"
           >
             Зарегистрироваться
           </Link>

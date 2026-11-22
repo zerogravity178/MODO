@@ -2,52 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * MODO 2.0 — палитра.
+ *
+ * Тёмная тема — основная (Premium Dark): графит, тонкие границы, бронзовый акцент.
+ * Светлая — полноценная альтернатива: тёплый бумажный фон и затемнённая бронза,
+ * потому что #C49A6C на белом даёт всего 2.57:1 и читать его невозможно.
+ *
+ * Контраст всех текстовых пар проверен по WCAG (норма 4.5:1 для текста,
+ * 3:1 для границ полей ввода и фокуса).
+ */
 @layer base {
   :root {
     color-scheme: light;
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+
+    --background: 45 33% 97.6%; /* #FBFAF7 */
+    --foreground: 210 11% 7.1%; /* #101214 */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 210 11% 7.1%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
+    --popover-foreground: 210 11% 7.1%;
+
+    /* Бронза в светлой теме затемнена: #8C6538 на белом = 5.21:1. */
+    --primary: 32 43% 38.4%; /* #8C6538 */
+    --primary-foreground: 0 0% 100%; /* белый на бронзе = 5.21:1 */
+    --primary-hover: 32 44% 33.3%; /* #7A5730, белый = 6.49:1 */
+
+    --secondary: 42 25% 92.2%; /* #F0EDE6 */
+    --secondary-foreground: 210 11% 7.1%;
+
+    --muted: 42 25% 92.2%;
+    --muted-foreground: 160 3% 37.3%; /* #5C6260, на фоне = 5.97:1 */
+
+    --accent: 42 25% 92.2%;
+    --accent-foreground: 210 11% 7.1%;
+
+    --destructive: 0 74% 41.8%; /* #B91C1C */
+    --destructive-foreground: 0 0% 100%; /* 6.47:1 */
+    /* Красный ТЕКСТ: на светлом фоне нужен темнее фонового красного. */
+    --danger: 0 74% 41.8%; /* #B91C1C, на белом = 6.47:1 */
+
+    --success: 158 74% 21%; /* #0B7A54 */
+
+    /* Декоративные границы карточек и разделителей. */
+    --border: 39 23% 87.8%; /* #E7E2D9 */
+    /* Границы интерактивных элементов: норма 3:1, поэтому темнее. */
+    --border-strong: 35 9% 53.7%; /* #948B7E, на белом = 3.36:1 */
+    --input: 35 9% 53.7%;
+
+    --ring: 32 43% 38.4%;
+
+    --surface: 40 21% 94.5%; /* #F4F2EE — панели, шапка, подложки */
+    --surface-foreground: 210 11% 7.1%;
+
+    --bronze: 32 43% 38.4%;
+    --bronze-foreground: 0 0% 100%;
+    --bronze-hover: 32 44% 33.3%;
+
     --radius: 0.5rem;
   }
 
   .dark {
     color-scheme: dark;
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+
+    --background: 210 11% 7.1%; /* #101214 */
+    --foreground: 48 15% 93.5%; /* #F1F0EC, на фоне = 16.46:1 */
+
+    --card: 200 9% 13.7%; /* #202426 */
+    --card-foreground: 48 15% 93.5%;
+
+    --popover: 200 9% 13.7%;
+    --popover-foreground: 48 15% 93.5%;
+
+    /* На бронзе текст тёмный: белый даёт 2.57:1, графит — 7.32:1. */
+    --primary: 31 43% 59.6%; /* #C49A6C */
+    --primary-foreground: 210 11% 7.1%; /* #101214 на бронзе = 7.32:1 */
+    --primary-hover: 31 49% 66.7%; /* #D4AC80, графит = 8.95:1 */
+
+    --secondary: 197 8% 16.3%; /* #262B2D */
+    --secondary-foreground: 48 15% 93.5%;
+
+    --muted: 197 8% 16.3%;
+    --muted-foreground: 168 2% 58.2%; /* #929796, на фоне = 6.34:1 */
+
+    --accent: 197 8% 16.3%;
+    --accent-foreground: 48 15% 93.5%;
+
+    --destructive: 0 72% 50.6%; /* #DC2626 */
+    --destructive-foreground: 0 0% 100%; /* 4.83:1 */
+    /* #DC2626 на фоне даёт 3.0:1 — для текста берём светлее. */
+    --danger: 0 91% 70.8%; /* #F87171, на фоне = 6.79:1 */
+
+    --success: 160 60% 45%; /* #2EBA8C */
+
+    /* #303537 к фону = 1.51:1 — только для декора, не для полей ввода. */
+    --border: 197 7% 20.2%; /* #303537 */
+    /* #6E7678 к фону = 4.05:1, к карточке = 3.37:1 — проходит норму 3:1. */
+    --border-strong: 192 4% 45.1%; /* #6E7678 */
+    --input: 192 4% 45.1%;
+
+    --ring: 31 43% 59.6%;
+
+    --surface: 204 9% 10.4%; /* #181B1D — панели, шапка, подложки */
+    --surface-foreground: 48 15% 93.5%;
+
+    --bronze: 31 43% 59.6%;
+    --bronze-foreground: 210 11% 7.1%;
+    --bronze-hover: 31 49% 66.7%;
   }
 }
 
@@ -77,6 +140,22 @@
     min-height: 100dvh;
     overscroll-behavior-y: none;
   }
+
+  /* Нативный выбор темы для скроллбаров и автозаполнения. */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground;
+    opacity: 1;
+  }
+
+  /* Автозаполнение Chrome красит фон в свой цвет — гасим его. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--card)) inset;
+    caret-color: hsl(var(--foreground));
+  }
 }
 
 /* На телефоне поля с шрифтом меньше 16px Safari зумит страницу при фокусе. */
@@ -101,5 +180,17 @@
   .px-safe {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Уважаем системную настройку «меньше движения». */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

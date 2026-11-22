@@ -302,7 +302,7 @@ export function RecordForm({
             <Label htmlFor={inputId}>
               {field.label}
               {field.required && (
-                <span className="ml-0.5 text-[#c2410c] dark:text-[#f97316]">*</span>
+                <span className="ml-0.5 text-primary">*</span>
               )}
             </Label>
 
@@ -312,7 +312,7 @@ export function RecordForm({
                 name={field.id}
                 value={value}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-border-strong bg-card px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm"
               >
                 <option value="">— не выбрано —</option>
                 {(field.options ?? []).map((option) => (
@@ -324,7 +324,7 @@ export function RecordForm({
             ) : field.type === "boolean" ? (
               <label
                 htmlFor={inputId}
-                className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 dark:border-neutral-700 dark:text-neutral-200"
+                className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-border-strong px-3 py-2 text-sm text-foreground"
               >
                 <input
                   id={inputId}
@@ -334,7 +334,7 @@ export function RecordForm({
                   onChange={(event) =>
                     setValue(field.id, event.target.checked ? "true" : "")
                   }
-                  className="h-4 w-4 rounded border-neutral-300 accent-[#f97316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:border-neutral-700"
+                  className="h-4 w-4 rounded border-border-strong accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 {value === "true" ? "Да" : "Отметить, если да"}
               </label>
@@ -345,7 +345,7 @@ export function RecordForm({
                 value={value}
                 rows={4}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="flex w-full resize-y rounded-md border border-neutral-300 bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:text-sm"
+                className="flex w-full resize-y rounded-md border border-border-strong bg-card px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:text-foreground sm:text-sm"
               />
             ) : field.type === "image" ? (
               <div className="space-y-2">
@@ -358,7 +358,7 @@ export function RecordForm({
                     placeholder="https://... или загрузите файл"
                     value={isStoragePath(value) ? "" : value}
                     onChange={(event) => setValue(field.id, event.target.value)}
-                    className="focus-visible:ring-[#f97316]"
+                    className="focus-visible:ring-ring"
                   />
                   <input
                     ref={(element) => {
@@ -390,7 +390,7 @@ export function RecordForm({
                 </div>
 
                 {isStoragePath(value) && (
-                  <div className="flex items-center justify-between gap-2 rounded-md border border-neutral-200 px-2 py-1.5 text-xs text-neutral-600 dark:border-neutral-800 dark:text-neutral-300">
+                  <div className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground">
                     <span className="truncate">Загруженный файл</span>
                     <button
                       type="button"
@@ -409,7 +409,7 @@ export function RecordForm({
                         });
                       }}
                       aria-label="Убрать файл"
-                      className="rounded-md p-2 text-neutral-500 transition hover:text-red-600 dark:text-neutral-400 [@media(hover:none)]:p-2.5"
+                      className="rounded-md p-2 text-muted-foreground transition hover:text-danger [@media(hover:none)]:p-2.5"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -421,7 +421,7 @@ export function RecordForm({
                   <img
                     src={previewUrl}
                     alt="Превью"
-                    className="h-32 w-full rounded-md border border-neutral-200 object-cover dark:border-neutral-800"
+                    className="h-32 w-full rounded-md border border-border object-cover"
                   />
                 )}
               </div>
@@ -436,7 +436,7 @@ export function RecordForm({
                 inputMode={field.type === "number" ? "decimal" : undefined}
                 value={value}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="focus-visible:ring-[#f97316]"
+                className="focus-visible:ring-ring"
               />
             )}
           </div>
@@ -444,7 +444,7 @@ export function RecordForm({
       })}
 
       {error && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -453,7 +453,7 @@ export function RecordForm({
         <Button
           type="submit"
           disabled={saving}
-          className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+          className="bg-primary text-primary-foreground hover:bg-primary-hover"
         >
           {saving ? "Сохраняем…" : isEdit ? "Сохранить" : "Добавить"}
         </Button>

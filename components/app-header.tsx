@@ -27,18 +27,18 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/80 pt-safe backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/80 pt-safe backdrop-blur">
       <div className="mx-auto flex w-full max-w-4xl items-center gap-3 px-5 py-3 sm:px-8">
         <Link
           href="/"
           className={cn(
             "flex items-center gap-2 rounded-md text-sm font-semibold transition",
             isHome
-              ? "text-neutral-900 dark:text-neutral-100"
-              : "text-neutral-500 hover:text-[#f97316] dark:text-neutral-400"
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-primary"
           )}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f97316] text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Box className="h-4 w-4" />
           </span>
           modo
@@ -53,7 +53,7 @@ export function AppHeader() {
             disabled={leaving}
             aria-label="Выйти из аккаунта"
             title="Выйти"
-            className="rounded-md p-2 text-neutral-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+            className="rounded-md p-2 text-muted-foreground transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 dark:hover:bg-danger/15"
           >
             <LogOut className="h-4 w-4" />
           </button>

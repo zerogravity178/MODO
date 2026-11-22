@@ -118,19 +118,19 @@ export function ModuleCard({
   const card = (
     <div
       className={cn(
-        "group flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#f97316]/60 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900",
+        "group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:border-primary/60 hover:shadow-sm",
         href && "pr-11",
         className
       )}
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <Icon className="h-5 w-5" />
       </span>
       <div className="min-w-0">
-        <p className="truncate font-medium text-neutral-900 dark:text-neutral-100">
+        <p className="truncate font-medium text-foreground">
           {name}
         </p>
-        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+        <p className="text-xs text-muted-foreground">
           {typeof count === "number"
             ? `${count} ${plural(count, "запись", "записи", "записей")}`
             : "Модуль"}
@@ -157,7 +157,7 @@ export function ModuleCard({
             disabled={duplicating}
             aria-label={`Дублировать модуль «${name}»`}
             title="Дублировать"
-            className="rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 transition hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-md p-2 text-muted-foreground [@media(hover:none)]:p-2.5 transition hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             <Copy className="h-4 w-4" />
           </button>
@@ -169,7 +169,7 @@ export function ModuleCard({
             onClick={openConfirm}
             aria-label={`Удалить модуль «${name}»`}
             title="Удалить модуль"
-            className="rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 transition hover:bg-red-50 dark:text-neutral-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:hover:bg-red-950/40 dark:hover:text-red-400"
+            className="rounded-md p-2 text-muted-foreground [@media(hover:none)]:p-2.5 transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-danger/15"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -177,7 +177,7 @@ export function ModuleCard({
       </div>
 
       {error && !confirmOpen && (
-        <p role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-1 text-xs text-danger">
           {error}
         </p>
       )}

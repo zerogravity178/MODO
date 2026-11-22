@@ -38,7 +38,7 @@ export function RecordCard({
   return (
     <div
       className={cn(
-        "group relative space-y-2 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#f97316]/50 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900",
+        "group relative space-y-2 rounded-xl border border-border bg-card p-4 transition hover:border-primary/50 hover:shadow-sm",
         onDelete && "pr-10",
         onEdit && "cursor-pointer",
         className
@@ -67,14 +67,14 @@ export function RecordCard({
           }}
           aria-label="Удалить запись"
           title="Удалить запись"
-          className="absolute right-2 top-2 rounded-md p-2 text-neutral-500 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
+          className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 dark:hover:bg-danger/15 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       )}
 
       {preview.length === 0 ? (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm text-muted-foreground">
           {fields.length === 0 ? "У модуля нет полей" : "Все поля пустые"}
         </p>
       ) : (
@@ -101,12 +101,12 @@ export function RecordCard({
                 key={field.id}
                 src={src}
                 alt={field.label}
-                className="h-24 w-full rounded-md border border-neutral-200 object-cover dark:border-neutral-800"
+                className="h-24 w-full rounded-md border border-border object-cover"
               />
             ) : (
               <div
                 key={field.id}
-                className="flex items-center gap-1.5 rounded-md border border-dashed border-neutral-200 px-2 py-1.5 text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400"
+                className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1.5 text-xs text-muted-foreground"
               >
                 <ClipboardCopy className="h-3.5 w-3.5" />
                 {field.label}: файл не загружен
@@ -121,7 +121,7 @@ export function RecordCard({
                 className="flex items-baseline justify-between gap-3"
               >
                 {!sameAsLabel && (
-                  <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+                  <span className="shrink-0 text-xs text-muted-foreground">
                     {field.label}
                   </span>
                 )}
@@ -129,8 +129,8 @@ export function RecordCard({
                   className={cn(
                     "min-w-0 truncate text-sm font-medium",
                     raw === true
-                      ? "text-emerald-700 dark:text-emerald-400"
-                      : "text-neutral-500 dark:text-neutral-400",
+                      ? "text-success"
+                      : "text-muted-foreground",
                     !sameAsLabel && "text-right"
                   )}
                 >
@@ -151,13 +151,13 @@ export function RecordCard({
               className="flex items-baseline justify-between gap-3"
             >
               {!sameAsLabel && (
-                <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {field.label}
                 </span>
               )}
               <span
                 className={cn(
-                  "min-w-0 truncate text-sm font-medium text-neutral-900 dark:text-neutral-100",
+                  "min-w-0 truncate text-sm font-medium text-foreground",
                   !sameAsLabel && "text-right"
                 )}
                 title={text}

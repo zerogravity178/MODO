@@ -193,20 +193,20 @@ export function ModuleSettings({
       <header className="space-y-5">
         <Link
           href={`/m/${module.id}`}
-          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
         >
           ← Назад к модулю
         </Link>
 
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Icon className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+            <h1 className="truncate text-2xl font-semibold text-foreground">
               Настройки
             </h1>
-            <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="truncate text-sm text-muted-foreground">
               {module.name}
             </p>
           </div>
@@ -224,7 +224,7 @@ export function ModuleSettings({
                 setName(event.target.value);
                 setSaved(false);
               }}
-              className="focus-visible:ring-[#f97316]"
+              className="focus-visible:ring-ring"
             />
           </div>
 
@@ -243,8 +243,8 @@ export function ModuleSettings({
                   title={choice.label}
                   className={
                     icon === choice.key
-                      ? "h-10 w-10 rounded-lg border-2 border-[#f97316] bg-[#f97316]/10 text-lg"
-                      : "h-10 w-10 rounded-lg border border-neutral-200 bg-white text-lg transition hover:border-[#f97316] dark:border-neutral-800 dark:bg-neutral-900"
+                      ? "h-10 w-10 rounded-lg border-2 border-primary bg-primary/10 text-lg"
+                      : "h-10 w-10 rounded-lg border border-border bg-card text-lg transition hover:border-primary"
                   }
                 >
                   {choice.emoji}
@@ -285,20 +285,20 @@ export function ModuleSettings({
         </div>
 
         {initialFields.length > 0 && (
-          <p className="rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
+          <p className="rounded-lg bg-surface px-3 py-2 text-xs text-muted-foreground dark:bg-card">
             Удаление поля не стирает уже сохранённые значения — они просто
             перестают показываться.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
 
         {saved && (
-          <p role="status" className="text-sm text-green-700 dark:text-green-500">
+          <p role="status" className="text-sm text-success">
             Сохранено
           </p>
         )}
@@ -306,18 +306,18 @@ export function ModuleSettings({
         <Button
           type="submit"
           disabled={saving}
-          className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+          className="bg-primary text-primary-foreground hover:bg-primary-hover"
         >
           {saving ? "Сохраняем…" : "Сохранить"}
         </Button>
       </form>
 
-      <section className="space-y-3 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+      <section className="space-y-3 rounded-xl border border-border p-4">
         <div className="space-y-1">
-          <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 className="font-semibold text-foreground">
             Экспорт
           </h2>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-muted-foreground">
             {records.length === 0
               ? "В модуле пока нет записей."
               : `Выгрузит ${records.length} ${plural(
@@ -351,12 +351,12 @@ export function ModuleSettings({
         </div>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-red-200 bg-red-50/50 p-4 dark:border-red-900/50 dark:bg-red-950/20">
+      <section className="space-y-3 rounded-xl border border-danger/30 bg-danger/10 p-4">
         <div className="space-y-1">
-          <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 className="font-semibold text-foreground">
             Удаление модуля
           </h2>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-muted-foreground">
             Модуль и все записи внутри будут удалены безвозвратно.
           </p>
         </div>
@@ -368,7 +368,7 @@ export function ModuleSettings({
             setDeleteError(null);
             setConfirmOpen(true);
           }}
-          className="border-red-300 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
+          className="border-danger/40 text-danger hover:bg-danger/15 hover:text-danger"
         >
           Удалить модуль
         </Button>
