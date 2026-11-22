@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Box, LogOut } from "lucide-react";
 
+import { BackupButton } from "@/components/backup-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function AppHeader() {
         </Link>
 
         <div className="ml-auto flex items-center gap-1">
+          <BackupButton />
           <ThemeToggle />
 
           <button
