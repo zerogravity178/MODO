@@ -1,12 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IMAGE_BUCKET, SIGNED_URL_TTL_SECONDS, isStoragePath } from "@/lib/images";
+import {
+  IMAGE_BUCKET,
+  SIGNED_URL_TTL_SECONDS,
+  isOwnStoragePath,
+  isStoragePath,
+  removeOwnImages,
+} from "@/lib/images";
 import { createClient } from "@/lib/supabase/client";
 import type { FieldDef } from "@/lib/types";
 
@@ -56,32 +62,48 @@ export function RecordForm({
   /** id поля → подписанная ссылка на только что загруженный файл. */
   const [uploadedUrls, setUploadedUrls] = useState<Record<string, string>>({});
   /**
-   * Пути файлов, которые пользователь убрал из формы. Удаляем их из Storage
-   * только после успешного сохранения — иначе «убрать» и «Отмена» стёрли бы
+   * Пути файлов, которые пользователь убрал или заменил. Удаляем их только
+   * после успешного сохранения — иначе «убрать» и «Отмена» стёрли бы
    * картинку у существующей записи.
    */
   const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
   /** Файлы, загруженные в этой сессии формы. При отмене их надо убрать. */
   const [sessionUploads, setSessionUploads] = useState<string[]>([]);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  /** Чтобы уборка при размонтировании видела актуальный список. */
+  const sessionUploadsRef = useRef<string[]>([]);
+  const savedRef = useRef(false);
+  const userIdRef = useRef<string>("");
 
-  /** Убирает из Storage файлы, которые пользователь снял с формы. */
-  async function dropPendingFiles(supabase: ReturnType<typeof createClient>) {
-    if (pendingRemoval.length === 0) return;
-    await supabase.storage.from(IMAGE_BUCKET).remove(pendingRemoval);
-    setPendingRemoval([]);
-  }
+  useEffect(() => {
+    sessionUploadsRef.current = sessionUploads;
+  }, [sessionUploads]);
 
-  /** Отмена: сохранения не будет, поэтому загруженные файлы — мусор. */
-  function handleCancel() {
-    if (sessionUploads.length > 0) {
-      void createClient().storage.from(IMAGE_BUCKET).remove(sessionUploads);
-    }
-    onCancel?.();
-  }
+  /**
+   * Уборка мусора, если форму закрыли крестиком или кликом по фону:
+   * загруженные файлы остались, но запись их уже не получит.
+   */
+  useEffect(() => {
+    return () => {
+      const leftovers = sessionUploadsRef.current;
+      if (savedRef.current || leftovers.length === 0) return;
+      if (!userIdRef.current) return;
+      void removeOwnImages(
+        createClient(),
+        leftovers,
+        userIdRef.current
+      );
+    };
+  }, []);
 
   function setValue(fieldId: string, value: string) {
     setValues((current) => ({ ...current, [fieldId]: value }));
+  }
+
+  function markForRemoval(path: string) {
+    setPendingRemoval((current) =>
+      current.includes(path) ? current : [...current, path]
+    );
   }
 
   async function handleFile(field: FieldDef, file: File) {
@@ -110,6 +132,8 @@ export function RecordForm({
       return;
     }
 
+    userIdRef.current = user.id;
+
     // Расширение из имени файла подчищаем: только буквы и цифры.
     const rawExt = file.name.split(".").pop() ?? "jpg";
     const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
@@ -123,6 +147,13 @@ export function RecordForm({
       setError(`Не удалось загрузить картинку: ${uploadError.message}`);
       setUploading((current) => ({ ...current, [field.id]: false }));
       return;
+    }
+
+    // Заменили существующую картинку — старую уберём после сохранения,
+    // иначе в хранилище останется файл-сирота.
+    const previous = values[field.id];
+    if (isOwnStoragePath(previous, user.id) && previous !== path) {
+      markForRemoval(previous);
     }
 
     // Сразу показываем картинку: bucket приватный, публичной ссылки нет.
@@ -140,6 +171,19 @@ export function RecordForm({
     setValue(field.id, path);
     setSessionUploads((current) => [...current, path]);
     setUploading((current) => ({ ...current, [field.id]: false }));
+  }
+
+  /** Отмена: сохранения не будет, поэтому загруженные файлы — мусор. */
+  function handleCancel() {
+    savedRef.current = true;
+    if (sessionUploads.length > 0 && userIdRef.current) {
+      void removeOwnImages(
+        createClient(),
+        sessionUploads,
+        userIdRef.current
+      );
+    }
+    onCancel?.();
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -191,8 +235,12 @@ export function RecordForm({
         return;
       }
 
-      // Запись сохранена — теперь можно убрать снятые файлы.
-      await dropPendingFiles(supabase);
+      // Запись сохранена — теперь можно убрать снятые и заменённые файлы.
+      savedRef.current = true;
+      if (pendingRemoval.length > 0 && userIdRef.current) {
+        void removeOwnImages(supabase, pendingRemoval, userIdRef.current);
+      }
+      setPendingRemoval([]);
       setSessionUploads([]);
       setSaving(false);
       onSaved?.();
@@ -209,6 +257,8 @@ export function RecordForm({
       return;
     }
 
+    userIdRef.current = user.id;
+
     const { error: insertError } = await supabase.from("records").insert({
       module_id: moduleId,
       user_id: user.id,
@@ -221,9 +271,14 @@ export function RecordForm({
       return;
     }
 
-    await dropPendingFiles(supabase);
+    savedRef.current = true;
+    if (pendingRemoval.length > 0) {
+      void removeOwnImages(supabase, pendingRemoval, user.id);
+    }
+    setPendingRemoval([]);
     setSessionUploads([]);
     setValues(Object.fromEntries(fields.map((field) => [field.id, ""])));
+    setUploadedUrls({});
     setSaving(false);
     onSaved?.();
   }
@@ -344,7 +399,7 @@ export function RecordForm({
                         // иначе «убрать» + «Отмена» удалило бы картинку
                         // у записи, которая никуда не делась.
                         if (isStoragePath(value)) {
-                          setPendingRemoval((current) => [...current, value]);
+                          markForRemoval(value);
                         }
                         setValue(field.id, "");
                         setUploadedUrls((current) => {

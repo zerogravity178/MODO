@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { deleteRecordWithImages } from "@/app/(app)/image-actions";
 import { createClient } from "@/lib/supabase/client";
 import {
   filterValues,
@@ -140,14 +141,12 @@ export function ModuleView({
     setDeleting(true);
     setDeleteError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("records")
-      .delete()
-      .eq("id", pendingDelete.id);
+    // Картинки записи убирает серверная часть: клиент не должен получать
+    // список чужих путей, а Storage всё равно проверит владельца.
+    const result = await deleteRecordWithImages(pendingDelete.id);
 
-    if (error) {
-      setDeleteError(error.message);
+    if (result.error) {
+      setDeleteError(result.error);
       setDeleting(false);
       return;
     }

@@ -8,6 +8,7 @@ import { Copy, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { plural } from "@/lib/records";
 import { getModuleIcon } from "@/components/module/module-icons";
+import { deleteModuleWithImages } from "@/app/(app)/image-actions";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -46,14 +47,11 @@ export function ModuleCard({
     setDeleting(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error: deleteError } = await supabase
-      .from("modules")
-      .delete()
-      .eq("id", id);
+    // Модуль удаляется каскадом с записями, файлы — на сервере.
+    const result = await deleteModuleWithImages(id);
 
-    if (deleteError) {
-      setError(deleteError.message);
+    if (result.error) {
+      setError(result.error);
       setDeleting(false);
       return;
     }

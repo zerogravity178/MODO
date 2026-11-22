@@ -8,6 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { FieldList } from "@/components/constructor/FieldList";
 import { FormPreview } from "@/components/constructor/FormPreview";
 import { getModuleIcon } from "@/components/module/module-icons";
+import { deleteModuleWithImages } from "@/app/(app)/image-actions";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -155,14 +156,10 @@ export function ModuleSettings({
     setDeleting(true);
     setDeleteError(null);
 
-    const supabase = createClient();
-    const { error: removeError } = await supabase
-      .from("modules")
-      .delete()
-      .eq("id", module.id);
+    const result = await deleteModuleWithImages(module.id);
 
-    if (removeError) {
-      setDeleteError(removeError.message);
+    if (result.error) {
+      setDeleteError(result.error);
       setDeleting(false);
       return;
     }

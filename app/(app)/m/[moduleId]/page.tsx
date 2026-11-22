@@ -44,7 +44,13 @@ export default async function ModulePage({
   const fields = parseFields(moduleRow.fields);
 
   // Bucket приватный: без подписанных ссылок браузер картинки не покажет.
-  const imageUrls = await signRecordImages(supabase, recordRows, fields);
+  // Подписываем только файлы из папки пользователя.
+  const imageUrls = await signRecordImages(
+    supabase,
+    recordRows,
+    fields,
+    user.id
+  );
 
   return (
     <ModuleView
