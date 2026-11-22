@@ -1,4 +1,11 @@
-import { Box, CheckSquare, Watch, Wallet, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  Box,
+  CheckSquare,
+  Watch,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -18,13 +25,20 @@ type ModuleCardProps = {
   name: string;
   icon?: string | null;
   count?: number;
+  href?: string;
   className?: string;
 };
 
-export function ModuleCard({ name, icon, count, className }: ModuleCardProps) {
+export function ModuleCard({
+  name,
+  icon,
+  count,
+  href,
+  className,
+}: ModuleCardProps) {
   const Icon = getModuleIcon(icon);
 
-  return (
+  const card = (
     <div
       className={cn(
         "group flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#f97316]/60 hover:shadow-sm",
@@ -43,6 +57,14 @@ export function ModuleCard({ name, icon, count, className }: ModuleCardProps) {
         </p>
       </div>
     </div>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link href={href} className="block">
+      {card}
+    </Link>
   );
 }
 
