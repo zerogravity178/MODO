@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ModuleCard, getModuleIcon } from "@/components/module/ModuleCard";
@@ -117,14 +118,15 @@ export default async function HomePage() {
           )}
 
           <Button
+            asChild
             variant="outline"
-            disabled
-            className="w-full border-dashed border-neutral-300 text-neutral-500"
+            className="w-full border-dashed border-neutral-300 text-neutral-600 hover:border-[#f97316] hover:text-[#f97316]"
           >
-            Собрать свой модуль
+            <Link href="/m/new">Собрать свой модуль</Link>
           </Button>
           <p className="text-xs text-neutral-400">
-            Конструктор своего модуля появится на следующем шаге.
+            Назовите модуль, выберите иконку и поля — всё остальное настроите
+            внутри.
           </p>
         </section>
       )}

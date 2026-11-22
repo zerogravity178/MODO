@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Box,
   CheckSquare,
+  ClipboardList,
   Watch,
   Wallet,
   type LucideIcon,
@@ -14,6 +15,7 @@ const ICONS: Record<string, LucideIcon> = {
   wallet: Wallet,
   watch: Watch,
   "check-square": CheckSquare,
+  "clipboard-list": ClipboardList,
 };
 
 export function getModuleIcon(icon: string | null | undefined): LucideIcon {
