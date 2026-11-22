@@ -1,56 +1,75 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ArrowDown, ArrowUp, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { FieldType } from "@/lib/types";
+import type { DraftField } from "@/lib/fields";
+import { FIELD_TYPES, type FieldType } from "@/lib/types";
 
-export type DraftField = {
-  /** Стабильный ключ строки в интерфейсе — в базу не попадает. */
-  key: number;
-  /** id поля в jsonb. Есть только у существующих полей модуля. */
-  id?: string;
-  label: string;
-  type: FieldType;
-  /** «Еда, Транспорт» — разбирается в options уже при сохранении. */
-  optionsText: string;
-};
+export type { DraftField };
 
-export const FIELD_TYPE_OPTIONS: { value: FieldType; label: string }[] = [
-  { value: "text", label: "Текст" },
-  { value: "number", label: "Число" },
-  { value: "date", label: "Дата" },
-  { value: "select", label: "Список" },
-  { value: "image", label: "Картинка" },
-];
+export const FIELD_TYPE_OPTIONS = FIELD_TYPES;
 
 type FieldRowProps = {
   field: DraftField;
   index: number;
+  total: number;
   onChange: (key: number, patch: Partial<DraftField>) => void;
   onRemove: (key: number) => void;
+  onMove: (key: number, direction: -1 | 1) => void;
 };
 
-export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
+export function FieldRow({
+  field,
+  index,
+  total,
+  onChange,
+  onRemove,
+  onMove,
+}: FieldRowProps) {
   const labelId = `field-label-${field.key}`;
   const typeId = `field-type-${field.key}`;
   const optionsId = `field-options-${field.key}`;
+  const requiredId = `field-required-${field.key}`;
 
   return (
     <div className="space-y-2 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
           Поле {index + 1}
         </p>
-        <button
-          type="button"
-          onClick={() => onRemove(field.key)}
-          aria-label={`Удалить поле ${index + 1}`}
-          className="rounded-md p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:text-neutral-400 dark:hover:bg-neutral-800 [@media(hover:none)]:p-2.5"
-        >
-          <X className="h-4 w-4" />
-        </button>
+
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => onMove(field.key, -1)}
+            disabled={index === 0}
+            aria-label={`Поднять поле ${index + 1}`}
+            title="Выше"
+            className="rounded-md p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:pointer-events-none disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 [@media(hover:none)]:p-2.5"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onMove(field.key, 1)}
+            disabled={index === total - 1}
+            aria-label={`Опустить поле ${index + 1}`}
+            title="Ниже"
+            className="rounded-md p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] disabled:pointer-events-none disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 [@media(hover:none)]:p-2.5"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onRemove(field.key)}
+            aria-label={`Удалить поле ${index + 1}`}
+            className="rounded-md p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:text-neutral-400 dark:hover:bg-neutral-800 [@media(hover:none)]:p-2.5"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[1fr_9rem]">
@@ -85,7 +104,7 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
             onChange={(event) =>
               onChange(field.key, { type: event.target.value as FieldType })
             }
-            className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-900 sm:h-9 sm:text-sm"
           >
             {FIELD_TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -115,6 +134,22 @@ export function FieldRow({ field, index, onChange, onRemove }: FieldRowProps) {
           />
         </div>
       )}
+
+      <label
+        htmlFor={requiredId}
+        className="flex min-h-9 w-fit cursor-pointer items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300"
+      >
+        <input
+          id={requiredId}
+          type="checkbox"
+          checked={field.required}
+          onChange={(event) =>
+            onChange(field.key, { required: event.target.checked })
+          }
+          className="h-4 w-4 rounded border-neutral-300 accent-[#f97316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] dark:border-neutral-700"
+        />
+        Обязательное
+      </label>
     </div>
   );
 }

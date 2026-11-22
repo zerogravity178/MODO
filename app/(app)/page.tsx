@@ -2,10 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 
+import { ExportAllButton } from "@/components/module/ExportAllButton";
 import { ModuleCard } from "@/components/module/ModuleCard";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { Button } from "@/components/ui/button";
+import { buildBackup } from "@/lib/export";
 import { createClient } from "@/lib/supabase/server";
+import type { ModuleRow, RecordRow } from "@/lib/types";
 
 import { createModuleFromTemplate } from "./actions";
 
@@ -56,6 +59,29 @@ export default async function HomePage() {
   const templates = templatesResult.data ?? [];
   const hasModules = modules.length > 0;
 
+  // Резервная копия собирается заранее на сервере: клиенту остаётся скачать
+  // готовый файл, без второго похода в базу.
+  let backupJson = "";
+  if (hasModules) {
+    const { data: allRecords } = await supabase
+      .from("records")
+      .select()
+      .order("created_at", { ascending: true });
+
+    backupJson = JSON.stringify(
+      buildBackup(
+        (modules as ModuleRow[]).map((module) => ({
+          module,
+          records: ((allRecords ?? []) as RecordRow[]).filter(
+            (record) => record.module_id === module.id
+          ),
+        }))
+      ),
+      null,
+      2
+    );
+  }
+
   return (
     <main className="space-y-10">
       <header className="space-y-1">
@@ -73,16 +99,19 @@ export default async function HomePage() {
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
               Мои модули
             </h2>
-            <Button
-              asChild
-              size="sm"
-              className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
-            >
-              <Link href="/m/new">
-                <Plus className="mr-1 h-4 w-4" />
-                Создать модуль
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              {backupJson && <ExportAllButton content={backupJson} />}
+              <Button
+                asChild
+                size="sm"
+                className="bg-[#f97316] text-white hover:bg-[#ea6a0b]"
+              >
+                <Link href="/m/new">
+                  <Plus className="mr-1 h-4 w-4" />
+                  Создать модуль
+                </Link>
+              </Button>
+            </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {modules.map((module) => (

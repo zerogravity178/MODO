@@ -1,13 +1,15 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { ClipboardCopy, Trash2 } from "lucide-react";
 
-import { formatFieldValue, type FieldDef } from "@/lib/types";
+import { formatFieldValue, isBlankValue, type FieldDef } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type RecordCardProps = {
   fields: FieldDef[];
   data: Record<string, unknown>;
+  /** fieldId → подписанная ссылка на картинку из Storage. */
+  imageUrls?: Record<string, string>;
   className?: string;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -16,17 +18,13 @@ type RecordCardProps = {
 /** Сколько полей максимум показываем в карточке — остальное в режиме «Таблица». */
 const PREVIEW_LIMIT = 4;
 
-/** Пустое значение: null, "", пробелы, пустой массив. Ноль и false — не пустые. */
-function isBlank(value: unknown): boolean {
-  if (value === null || value === undefined) return true;
-  if (typeof value === "string") return value.trim() === "";
-  if (Array.isArray(value)) return value.length === 0;
-  return false;
-}
+/** Длинный текст в карточке обрезаем: простыня ломает сетку. */
+const TEXT_PREVIEW_LIMIT = 120;
 
 export function RecordCard({
   fields,
   data,
+  imageUrls,
   className,
   onEdit,
   onDelete,
@@ -34,7 +32,7 @@ export function RecordCard({
   // Сначала выбрасываем пустые поля, потом ограничиваем количество:
   // иначе карточка с двумя заполненными полями из шести выглядела бы полупустой.
   const preview = fields
-    .filter((field) => !isBlank(data[field.id]))
+    .filter((field) => !isBlankValue(data[field.id]))
     .slice(0, PREVIEW_LIMIT);
 
   return (
@@ -69,7 +67,7 @@ export function RecordCard({
           }}
           aria-label="Удалить запись"
           title="Удалить запись"
-          className="absolute right-2 top-2 rounded-md p-2 text-neutral-500 [@media(hover:none)]:p-2.5 opacity-0 transition hover:bg-red-50 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:opacity-100"
+          className="absolute right-2 top-2 rounded-md p-2 text-neutral-500 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] group-hover:opacity-100 dark:text-neutral-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -82,8 +80,8 @@ export function RecordCard({
       ) : (
         preview.map((field) => {
           const raw = data[field.id];
-          const isImage =
-            field.type === "image" && typeof raw === "string" && raw.length > 0;
+          const signedUrl = imageUrls?.[field.id];
+          const isImage = field.type === "image";
           const text = formatFieldValue(raw);
           // Бывает, что в поле вписали его же название («Сумма» = «Сумма»).
           // Показывать подпись и значение дважды незачем.
@@ -91,16 +89,61 @@ export function RecordCard({
             text.trim().toLowerCase() === field.label.trim().toLowerCase();
 
           if (isImage) {
-            return (
+            const src =
+              signedUrl ??
+              (typeof raw === "string" && raw.startsWith("http")
+                ? raw
+                : undefined);
+
+            return src ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={field.id}
-                src={raw as string}
+                src={src}
                 alt={field.label}
                 className="h-24 w-full rounded-md border border-neutral-200 object-cover dark:border-neutral-800"
               />
+            ) : (
+              <div
+                key={field.id}
+                className="flex items-center gap-1.5 rounded-md border border-dashed border-neutral-200 px-2 py-1.5 text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400"
+              >
+                <ClipboardCopy className="h-3.5 w-3.5" />
+                {field.label}: файл не загружен
+              </div>
             );
           }
+
+          if (field.type === "boolean") {
+            return (
+              <div
+                key={field.id}
+                className="flex items-baseline justify-between gap-3"
+              >
+                {!sameAsLabel && (
+                  <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+                    {field.label}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "min-w-0 truncate text-sm font-medium",
+                    raw === true
+                      ? "text-emerald-700 dark:text-emerald-400"
+                      : "text-neutral-500 dark:text-neutral-400",
+                    !sameAsLabel && "text-right"
+                  )}
+                >
+                  {raw === true ? "Да" : "Нет"}
+                </span>
+              </div>
+            );
+          }
+
+          const truncated =
+            field.type === "textarea" && text.length > TEXT_PREVIEW_LIMIT
+              ? `${text.slice(0, TEXT_PREVIEW_LIMIT).trimEnd()}…`
+              : text;
 
           return (
             <div
@@ -119,7 +162,7 @@ export function RecordCard({
                 )}
                 title={text}
               >
-                {text}
+                {truncated}
               </span>
             </div>
           );

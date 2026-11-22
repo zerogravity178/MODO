@@ -3,14 +3,21 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 import { FieldList } from "@/components/constructor/FieldList";
-import type { DraftField } from "@/components/constructor/FieldRow";
+import { FormPreview } from "@/components/constructor/FormPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  describeIssue,
+  makeEmptyField,
+  toFieldDefs,
+  validateDrafts,
+  type DraftField,
+} from "@/lib/fields";
 import { createClient } from "@/lib/supabase/client";
-import type { FieldDef, FieldType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,18 +32,6 @@ const ICON_CHOICES: { emoji: string; icon: string; title: string }[] = [
   { emoji: "📋", icon: "clipboard-list", title: "Список" },
 ];
 
-function makeEmptyField(key: number): DraftField {
-  return { key, label: "", type: "text", optionsText: "" };
-}
-
-/** «Еда, Транспорт,  Жильё» → ["Еда","Транспорт","Жильё"] */
-function splitOptions(value: string): string[] {
-  return value
-    .split(",")
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
-}
-
 export default function NewModulePage() {
   const router = useRouter();
 
@@ -46,6 +41,7 @@ export default function NewModulePage() {
   const [fields, setFields] = useState<DraftField[]>(() => [
     makeEmptyField(0),
   ]);
+  const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -82,39 +78,14 @@ export default function NewModulePage() {
       return;
     }
 
-    const withoutLabel = fields.findIndex(
-      (field) => field.label.trim() === ""
-    );
-
-    if (withoutLabel !== -1) {
-      setError(`У поля ${withoutLabel + 1} нет названия`);
-      return;
-    }
-
-    const emptySelect = fields.findIndex(
-      (field) =>
-        field.type === "select" && splitOptions(field.optionsText).length === 0
-    );
-
-    if (emptySelect !== -1) {
-      setError(`У поля ${emptySelect + 1} не заполнены варианты`);
+    const issue = validateDrafts(fields);
+    if (issue) {
+      setError(describeIssue(issue));
       return;
     }
 
     // id поля попадает в records.data как ключ — держим его коротким.
-    const payloadFields: FieldDef[] = fields.map((field, index) => {
-      const base: FieldDef = {
-        id: `f${index + 1}`,
-        label: field.label.trim(),
-        type: field.type as FieldType,
-      };
-
-      if (field.type === "select") {
-        base.options = splitOptions(field.optionsText);
-      }
-
-      return base;
-    });
+    const payloadFields = toFieldDefs(fields, []);
 
     setSaving(true);
 
@@ -156,7 +127,7 @@ export default function NewModulePage() {
       <header className="space-y-5">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
+          className="inline-flex min-h-9 items-center gap-1 text-sm text-neutral-500 transition hover:text-[#f97316] dark:text-neutral-400"
         >
           ← Назад
         </Link>
@@ -217,7 +188,27 @@ export default function NewModulePage() {
           onChange={updateField}
           onAdd={addField}
           onRemove={removeField}
+          onReorder={setFields}
         />
+
+        <div className="space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPreview((current) => !current)}
+            aria-expanded={showPreview}
+            className="w-full sm:w-auto"
+          >
+            {showPreview ? (
+              <EyeOff className="mr-1 h-4 w-4" />
+            ) : (
+              <Eye className="mr-1 h-4 w-4" />
+            )}
+            {showPreview ? "Скрыть предпросмотр" : "Предпросмотр формы"}
+          </Button>
+
+          {showPreview && <FormPreview fields={fields} />}
+        </div>
 
         {error && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">

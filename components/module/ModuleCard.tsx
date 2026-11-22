@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Copy, Trash2 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { plural } from "@/lib/records";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -133,7 +134,7 @@ export function ModuleCard({
         </p>
         <p className="text-xs text-neutral-500 dark:text-neutral-400">
           {typeof count === "number"
-            ? `${count} ${count === 1 ? "запись" : count < 5 ? "записи" : "записей"}`
+            ? `${count} ${plural(count, "запись", "записи", "записей")}`
             : "Модуль"}
         </p>
       </div>

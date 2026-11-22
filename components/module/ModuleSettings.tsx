@@ -1,21 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 import { FieldList } from "@/components/constructor/FieldList";
-import type { DraftField } from "@/components/constructor/FieldRow";
+import { FormPreview } from "@/components/constructor/FormPreview";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  describeIssue,
+  makeEmptyField,
+  toDraft,
+  toFieldDefs,
+  validateDrafts,
+  type DraftField,
+} from "@/lib/fields";
+import { buildModuleExport, downloadFile, safeFileName, toCsv } from "@/lib/export";
 import { createClient } from "@/lib/supabase/client";
-import { parseFields, type FieldDef, type ModuleRow } from "@/lib/types";
+import { plural } from "@/lib/records";
+import { parseFields, type ModuleRow, type RecordRow } from "@/lib/types";
 
 type ModuleSettingsProps = {
   module: ModuleRow;
+  records: RecordRow[];
+  imageCount: number;
 };
 
 const ICON_CHOICES: { key: string; emoji: string; label: string }[] = [
@@ -26,64 +40,26 @@ const ICON_CHOICES: { key: string; emoji: string; label: string }[] = [
   { key: "clipboard-list", emoji: "📋", label: "Список" },
 ];
 
-/** FieldDef → DraftField: id сохраняем, чтобы правки не порвали записи. */
-function toDraft(fields: FieldDef[]): DraftField[] {
-  return fields.map((field, index) => ({
-    key: index + 1,
-    id: field.id,
-    label: field.label,
-    type: field.type,
-    optionsText: (field.options ?? []).join(", "),
-  }));
-}
-
-/**
- * DraftField → FieldDef. Прежние поля сохраняют свой id, новые получают
- * свободный `fN` — иначе удаление строки в середине сдвинуло бы значения
- * у всех последующих полей.
- */
-function toFieldDefs(drafts: DraftField[], previous: FieldDef[]): FieldDef[] {
-  const taken = new Set(drafts.map((draft) => draft.id).filter(Boolean));
-  let counter = previous.length + 1;
-
-  return drafts.map((draft) => {
-    let id = draft.id;
-
-    if (!id) {
-      while (taken.has(`f${counter}`)) counter += 1;
-      id = `f${counter}`;
-      taken.add(id);
-      counter += 1;
-    }
-
-    return {
-      id,
-      label: draft.label.trim(),
-      type: draft.type,
-      ...(draft.type === "select"
-        ? {
-            options: draft.optionsText
-              .split(",")
-              .map((option) => option.trim())
-              .filter(Boolean),
-          }
-        : {}),
-    };
-  });
-}
-
-export function ModuleSettings({ module }: ModuleSettingsProps) {
+export function ModuleSettings({
+  module,
+  records,
+  imageCount,
+}: ModuleSettingsProps) {
   const router = useRouter();
   const Icon = getModuleIcon(module.icon);
 
-  const initialFields = parseFields(module.fields);
+  const initialFields = useMemo(() => parseFields(module.fields), [module.fields]);
 
   const [name, setName] = useState(module.name);
   const [icon, setIcon] = useState(module.icon ?? "box");
   const [drafts, setDrafts] = useState<DraftField[]>(() =>
     toDraft(initialFields)
   );
-  const [nextKey, setNextKey] = useState(drafts.length + 1);
+  // Ключи строк должны быть уникальны: берём заведомо больший, чем любой стартовый.
+  const [nextKey, setNextKey] = useState(() =>
+    initialFields.length + 1
+  );
+  const [showPreview, setShowPreview] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,17 +70,20 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function patchField(key: number, patch: Partial<DraftField>) {
-    setDrafts((current) =>
-      current.map((field) => (field.key === key ? { ...field, ...patch } : field))
+    const next = drafts.map((field) =>
+      field.key === key ? { ...field, ...patch } : field
     );
+
+    setDrafts(next);
     setSaved(false);
+
+    if (patch.type) {
+      warnAboutTypeChange(next, key);
+    }
   }
 
   function addField() {
-    setDrafts((current) => [
-      ...current,
-      { key: nextKey, label: "", type: "text", optionsText: "" },
-    ]);
+    setDrafts((current) => [...current, makeEmptyField(nextKey)]);
     setNextKey((current) => current + 1);
     setSaved(false);
   }
@@ -112,6 +91,23 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
   function removeField(key: number) {
     setDrafts((current) => current.filter((field) => field.key !== key));
     setSaved(false);
+  }
+
+  /**
+   * Смена типа у существующего поля. Данные не переписываем — значения
+   * просто могут перестать отображаться в новом виде, об этом предупреждаем.
+   */
+  function warnAboutTypeChange(next: DraftField[], key: number) {
+    const draft = next.find((field) => field.key === key);
+    if (!draft?.id) return;
+
+    const before = initialFields.find((field) => field.id === draft.id);
+    if (!before || before.type === draft.type) return;
+    if (records.length === 0) return;
+
+    setError(
+      `Тип поля «${draft.label || "без названия"}» изменён. Уже сохранённые значения могут отображаться иначе.`
+    );
   }
 
   async function handleSave(event: React.FormEvent<HTMLFormElement>) {
@@ -126,24 +122,9 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
       return;
     }
 
-    const incomplete = drafts.find((field) => !field.label.trim());
-
-    if (incomplete) {
-      setError("У каждого поля должно быть название");
-      return;
-    }
-
-    const brokenSelect = drafts.find(
-      (field) =>
-        field.type === "select" &&
-        field.optionsText
-          .split(",")
-          .map((option) => option.trim())
-          .filter(Boolean).length === 0
-    );
-
-    if (brokenSelect) {
-      setError(`У списка «${brokenSelect.label}» нет вариантов`);
+    const issue = validateDrafts(drafts);
+    if (issue) {
+      setError(describeIssue(issue));
       return;
     }
 
@@ -190,6 +171,24 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
     setConfirmOpen(false);
     router.push("/");
     router.refresh();
+  }
+
+  function exportJson() {
+    const payload = buildModuleExport(module, records);
+    downloadFile(
+      JSON.stringify(payload, null, 2),
+      safeFileName(module.name, "json"),
+      "application/json"
+    );
+  }
+
+  function exportCsv() {
+    const payload = buildModuleExport(module, records);
+    downloadFile(
+      toCsv(payload.fields, payload.records),
+      safeFileName(module.name, "csv"),
+      "text/csv"
+    );
   }
 
   return (
@@ -263,7 +262,30 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
           onChange={patchField}
           onAdd={addField}
           onRemove={removeField}
+          onReorder={(next) => {
+            setDrafts(next);
+            setSaved(false);
+          }}
         />
+
+        <div className="space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPreview((current) => !current)}
+            aria-expanded={showPreview}
+            className="w-full sm:w-auto"
+          >
+            {showPreview ? (
+              <EyeOff className="mr-1 h-4 w-4" />
+            ) : (
+              <Eye className="mr-1 h-4 w-4" />
+            )}
+            {showPreview ? "Скрыть предпросмотр" : "Предпросмотр формы"}
+          </Button>
+
+          {showPreview && <FormPreview fields={drafts} />}
+        </div>
 
         {initialFields.length > 0 && (
           <p className="rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
@@ -292,6 +314,45 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
           {saving ? "Сохраняем…" : "Сохранить"}
         </Button>
       </form>
+
+      <section className="space-y-3 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+        <div className="space-y-1">
+          <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
+            Экспорт
+          </h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {records.length === 0
+              ? "В модуле пока нет записей."
+              : `Выгрузит ${records.length} ${plural(
+                  records.length,
+                  "запись",
+                  "записи",
+                  "записей"
+                )} вместе с описанием полей.`}
+            {imageCount > 0 &&
+              " Ссылки на загруженные картинки в файл не попадают — файлы лежат в приватном хранилище."}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={exportJson}
+            disabled={records.length === 0}
+          >
+            Скачать JSON
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={exportCsv}
+            disabled={records.length === 0}
+          >
+            Скачать CSV
+          </Button>
+        </div>
+      </section>
 
       <section className="space-y-3 rounded-xl border border-red-200 bg-red-50/50 p-4 dark:border-red-900/50 dark:bg-red-950/20">
         <div className="space-y-1">
@@ -333,6 +394,14 @@ export function ModuleSettings({ module }: ModuleSettingsProps) {
           void handleDelete();
         }}
       />
+
+      {records.length === 0 && (
+        <EmptyState
+          icon={module.icon}
+          title="Записей пока нет"
+          description="Экспорт появится, как только вы добавите первую запись."
+        />
+      )}
     </div>
   );
 }
