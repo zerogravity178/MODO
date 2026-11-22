@@ -9,11 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-type AppHeaderProps = {
-  email: string;
-};
-
-export function AppHeader({ email }: AppHeaderProps) {
+export function AppHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const [leaving, setLeaving] = useState(false);
@@ -49,13 +45,6 @@ export function AppHeader({ email }: AppHeaderProps) {
         </Link>
 
         <div className="ml-auto flex items-center gap-1">
-          <span
-            className="hidden max-w-[16rem] truncate text-xs text-neutral-500 sm:block dark:text-neutral-400"
-            title={email}
-          >
-            {email}
-          </span>
-
           <ThemeToggle />
 
           <button
