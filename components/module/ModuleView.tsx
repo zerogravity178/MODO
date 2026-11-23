@@ -1,22 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowDownUp,
-  LayoutGrid,
-  List,
-  Plus,
-  Search,
-  Settings,
-  SlidersHorizontal,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
+import { ModuleHeader, type ViewMode } from "@/components/module/module-header";
 import { RecordCard } from "@/components/module/RecordCard";
-import { getModuleIcon } from "@/components/module/module-icons";
+import { RecordTable } from "@/components/module/record-table";
+import { RecordToolbar } from "@/components/module/record-toolbar";
 import { RecordForm } from "@/components/record/RecordForm";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -28,30 +19,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FieldInput, FieldSelect } from "@/components/ui/field";
-import { IconBadge } from "@/components/ui/icon-badge";
-import { Surface } from "@/components/ui/surface";
 import { deleteRecordWithImages } from "@/app/(app)/image-actions";
 import { createClient } from "@/lib/supabase/client";
 import {
-  filterValues,
   matchesFilters,
   matchesQuery,
-  plural,
   sortItems,
   withData,
   type SortDirection,
   type SortKey,
 } from "@/lib/records";
-import {
-  formatFieldValue,
-  type FieldDef,
-  type ModuleRow,
-  type RecordRow,
-} from "@/lib/types";
-import { cn } from "@/lib/utils";
-
-type ViewMode = "cards" | "table";
+import type { FieldDef, ModuleRow, RecordRow } from "@/lib/types";
 
 type ModuleViewProps = {
   module: ModuleRow;
@@ -75,7 +53,6 @@ export function ModuleView({
   imageUrls,
 }: ModuleViewProps) {
   const router = useRouter();
-  const Icon = getModuleIcon(module.icon);
 
   const [view, setView] = useState<ViewMode>(
     module.default_view === "table" ? "table" : "cards"
@@ -96,9 +73,9 @@ export function ModuleView({
 
   const items = useMemo(() => withData(records), [records]);
   const total = records.length;
+  const filterable = useMemo(() => filterableFields(fields), [fields]);
 
   const activeFilters = Object.values(filters).filter(Boolean).length;
-  const filtersActive = activeFilters > 0 || query.trim().length > 0;
 
   const visible = useMemo(() => {
     const filtered = items.filter(
@@ -161,213 +138,46 @@ export function ModuleView({
     setFormOpen(true);
   }
 
-  function urlFor(recordId: string, fieldId: string): string | undefined {
-    return imageUrls?.[recordId]?.[fieldId];
+  function askDelete(record: RecordRow) {
+    setDeleteError(null);
+    setPendingDelete(record);
   }
 
   return (
     <div className="space-y-6">
-      <header className="space-y-4">
-        <Link
-          href="/"
-          className="inline-flex min-h-9 items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
-        >
-          ← Назад
-        </Link>
+      <ModuleHeader
+        module={module}
+        total={total}
+        view={view}
+        onChangeView={changeView}
+        onCreate={openCreate}
+      />
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <IconBadge icon={Icon} size="md" />
-            <div className="min-w-0">
-              <h1 className="truncate text-2xl font-semibold text-foreground">
-                {module.name}
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                {total === 0
-                  ? "пока пусто"
-                  : `${total} ${plural(total, "запись", "записи", "записей")}`}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" asChild>
-              <Link
-                href={`/m/${module.id}/settings`}
-                aria-label="Настройки модуля"
-                title="Настройки"
-              >
-                <Settings className="h-4 w-4" />
-              </Link>
-            </Button>
-
-            <Button
-              onClick={openCreate}
-              className="bg-primary text-primary-foreground hover:bg-primary-hover"
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Добавить
-            </Button>
-          </div>
-        </div>
-
-        {total > 0 && (
-          <>
-            <div className="flex gap-1 rounded-lg border border-border p-1 sm:w-fit">
-              {(
-                [
-                  { id: "cards" as const, label: "Карточки", icon: LayoutGrid },
-                  { id: "table" as const, label: "Таблица", icon: List },
-                ]
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => changeView(tab.id)}
-                  aria-pressed={view === tab.id}
-                  className={cn(
-                    "flex min-h-9 flex-1 items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition sm:flex-none",
-                    view === tab.id
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent"
-                  )}
-                >
-                  <tab.icon className="h-3.5 w-3.5" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <FieldInput
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Поиск по записям"
-                  aria-label="Поиск по записям"
-                  size="compact"
-                  className="pl-9 pr-2"
-                />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setPanelOpen((open) => !open)}
-                aria-expanded={panelOpen}
-                aria-controls="filters-panel"
-                className={cn(
-                  "flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9",
-                  activeFilters > 0
-                    ? "border-primary text-primary"
-                    : "border-border-strong text-muted-foreground hover:border-primary"
-                )}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline">Фильтры</span>
-                {activeFilters > 0 && (
-                  <span className="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {panelOpen && (
-              <Surface
-                id="filters-panel"
-                variant="plain"
-                padding="sm"
-                className="space-y-3"
-              >
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <label className="space-y-1">
-                    <span className="text-xs text-muted-foreground">
-                      Сортировка
-                    </span>
-                    <FieldSelect
-                      value={sortKey}
-                      onChange={(event) => setSortKey(event.target.value)}
-                      size="compact"
-                    >
-                      <option value="__created_at__">По дате создания</option>
-                      {fields.map((field) => (
-                        <option key={field.id} value={field.id}>
-                          {field.label}
-                        </option>
-                      ))}
-                    </FieldSelect>
-                  </label>
-
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">
-                      Направление
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSortDirection((current) =>
-                          current === "asc" ? "desc" : "asc"
-                        )
-                      }
-                      className="flex h-10 w-full items-center justify-center gap-1.5 rounded-md border border-border-strong px-2 text-sm text-foreground transition hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9"
-                    >
-                      <ArrowDownUp className="h-4 w-4" />
-                      {sortDirection === "asc" ? "По возрастанию" : "По убыванию"}
-                    </button>
-                  </div>
-                </div>
-
-                {filterableFields(fields).length > 0 && (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {filterableFields(fields).map((field) => (
-                      <label key={field.id} className="space-y-1">
-                        <span className="text-xs text-muted-foreground">
-                          {field.label}
-                        </span>
-                        <FieldSelect
-                          value={filters[field.id] ?? ""}
-                          onChange={(event) =>
-                            setFilters((current) => ({
-                              ...current,
-                              [field.id]: event.target.value,
-                            }))
-                          }
-                          size="compact"
-                        >
-                          <option value="">Любое</option>
-                          {filterValues(items, field).map((value) => (
-                            <option key={value} value={value}>
-                              {value}
-                            </option>
-                          ))}
-                          <option value="__empty__">Пустые</option>
-                        </FieldSelect>
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={resetAll}
-                  className="inline-flex min-h-9 items-center gap-1 text-xs text-muted-foreground transition hover:text-primary"
-                >
-                  <X className="h-3.5 w-3.5" />
-                  Сбросить
-                </button>
-              </Surface>
-            )}
-
-            {filtersActive && (
-              <p className="text-xs text-muted-foreground">
-                Найдено: {visible.length} из {total}
-              </p>
-            )}
-          </>
-        )}
-      </header>
+      {total > 0 && (
+        <RecordToolbar
+          query={query}
+          onQueryChange={setQuery}
+          panelOpen={panelOpen}
+          onTogglePanel={() => setPanelOpen((open) => !open)}
+          activeFilters={activeFilters}
+          found={visible.length}
+          total={total}
+          sortKey={sortKey}
+          onSortKeyChange={setSortKey}
+          sortDirection={sortDirection}
+          onToggleDirection={() =>
+            setSortDirection((current) => (current === "asc" ? "desc" : "asc"))
+          }
+          filters={filters}
+          onFilterChange={(fieldId, value) =>
+            setFilters((current) => ({ ...current, [fieldId]: value }))
+          }
+          items={items}
+          fields={fields}
+          filterable={filterable}
+          onReset={resetAll}
+        />
+      )}
 
       {total === 0 ? (
         <EmptyState
@@ -401,11 +211,9 @@ export function ModuleView({
               fields={fields}
               data={item.data}
               imageUrls={imageUrls?.[item.record.id]}
+              createdAt={item.record.created_at ?? undefined}
               onEdit={() => setEditing(item.record)}
-              onDelete={() => {
-                setDeleteError(null);
-                setPendingDelete(item.record);
-              }}
+              onDelete={() => askDelete(item.record)}
             />
           ))}
         </div>
@@ -415,10 +223,7 @@ export function ModuleView({
           items={visible}
           imageUrls={imageUrls}
           onEdit={setEditing}
-          onDelete={(record) => {
-            setDeleteError(null);
-            setPendingDelete(record);
-          }}
+          onDelete={askDelete}
         />
       )}
 
@@ -448,9 +253,7 @@ export function ModuleView({
             initialValues={
               editing ? (withData([editing])[0]?.data ?? {}) : undefined
             }
-            initialImageUrls={
-              editing ? imageUrls?.[editing.id] : undefined
-            }
+            initialImageUrls={editing ? imageUrls?.[editing.id] : undefined}
             onSaved={handleSaved}
             onCancel={() => {
               setFormOpen(false);
@@ -477,108 +280,6 @@ export function ModuleView({
         }}
       />
     </div>
-  );
-}
-
-type RecordTableProps = {
-  fields: FieldDef[];
-  items: ReturnType<typeof withData>;
-  imageUrls?: Record<string, Record<string, string>>;
-  onEdit: (record: RecordRow) => void;
-  onDelete: (record: RecordRow) => void;
-};
-
-function RecordTable({
-  fields,
-  items,
-  imageUrls,
-  onEdit,
-  onDelete,
-}: RecordTableProps) {
-  return (
-    <Surface
-      variant="plain"
-      padding="none"
-      className="relative overflow-x-auto"
-    >
-      <table className="w-full border-collapse text-sm">
-        <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
-          <tr>
-            {fields.map((field) => (
-              <th key={field.id} className="px-3 py-2 font-medium">
-                {field.label}
-              </th>
-            ))}
-            <th className="px-3 py-2 font-medium">Создано</th>
-            <th className="w-10 px-3 py-2">
-              <span className="sr-only">Действия</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(({ record, data }) => (
-            <tr
-              key={record.id}
-              onClick={() => onEdit(record)}
-              className="group cursor-pointer border-t border-border align-middle transition hover:bg-accent"
-            >
-              {fields.map((field) => {
-                const value = data[field.id];
-                const src =
-                  field.type === "image"
-                    ? (imageUrls?.[record.id]?.[field.id] ??
-                      (typeof value === "string" && value.startsWith("http")
-                        ? value
-                        : undefined))
-                    : undefined;
-
-                return (
-                  <td
-                    key={field.id}
-                    className="px-3 py-2 text-foreground"
-                  >
-                    {src ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={src}
-                        alt={field.label}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : field.type === "image" && value ? (
-                      <span className="text-xs text-muted-foreground">
-                        файл
-                      </span>
-                    ) : (
-                      formatFieldValue(value)
-                    )}
-                  </td>
-                );
-              })}
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
-                {record.created_at
-                  ? new Date(record.created_at).toLocaleDateString("ru-RU")
-                  : "—"}
-              </td>
-              <td className="px-3 py-2 text-right">
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onDelete(record);
-                  }}
-                  aria-label="Удалить запись"
-                  title="Удалить запись"
-                  className="rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Surface>
   );
 }
 

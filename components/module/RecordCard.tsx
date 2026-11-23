@@ -11,36 +11,57 @@ type RecordCardProps = {
   data: Record<string, unknown>;
   /** fieldId → подписанная ссылка на картинку из Storage. */
   imageUrls?: Record<string, string>;
+  /** Дата создания — показывается подписью в подвале карточки. */
+  createdAt?: string;
   className?: string;
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
-/** Сколько полей максимум показываем в карточке — остальное в режиме «Таблица». */
-const PREVIEW_LIMIT = 4;
+/** Сколько строк показываем в карточке: заголовок + 3 строки. */
+const PREVIEW_LIMIT = 3;
 
 /** Длинный текст в карточке обрезаем: простыня ломает сетку. */
 const TEXT_PREVIEW_LIMIT = 120;
+
+/** Заголовком карточки не может быть картинка или галочка — они не читаются. */
+const TITLE_TYPES: FieldDef["type"][] = ["text", "textarea", "number", "date", "select"];
+
+function formatDay(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+}
 
 export function RecordCard({
   fields,
   data,
   imageUrls,
+  createdAt,
   className,
   onEdit,
   onDelete,
 }: RecordCardProps) {
-  // Сначала выбрасываем пустые поля, потом ограничиваем количество:
-  // иначе карточка с двумя заполненными полями из шести выглядела бы полупустой.
-  const preview = fields
-    .filter((field) => !isBlankValue(data[field.id]))
+  const filled = fields.filter((field) => !isBlankValue(data[field.id]));
+
+  // Заголовок — первое осмысленное значение. Раньше карточка начиналась
+  // с подписи поля, и при десятке записей их приходилось читать целиком.
+  const titleField =
+    filled.find((field) => TITLE_TYPES.includes(field.type)) ?? filled[0];
+
+  // Остальные поля — компактными строками, картинки отдельно.
+  const rest = filled
+    .filter((field) => field.id !== titleField?.id)
     .slice(0, PREVIEW_LIMIT);
+  const images = filled.filter((field) => field.type === "image").slice(0, 1);
+
+  const titleText = titleField ? formatFieldValue(data[titleField.id]) : "";
 
   return (
     <Surface
       interactive
       className={cn(
-        "group relative space-y-2",
+        "group relative flex h-full min-w-0 flex-col gap-2.5",
         onDelete && "pr-10",
         onEdit && "cursor-pointer",
         className
@@ -75,24 +96,96 @@ export function RecordCard({
         </button>
       )}
 
-      {preview.length === 0 ? (
+      {filled.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {fields.length === 0 ? "У модуля нет полей" : "Все поля пустые"}
         </p>
       ) : (
-        preview.map((field) => {
-          const raw = data[field.id];
-          const signedUrl = imageUrls?.[field.id];
-          const isImage = field.type === "image";
-          const text = formatFieldValue(raw);
-          // Бывает, что в поле вписали его же название («Сумма» = «Сумма»).
-          // Показывать подпись и значение дважды незачем.
-          const sameAsLabel =
-            text.trim().toLowerCase() === field.label.trim().toLowerCase();
+        <>
+          <div className="min-w-0 space-y-0.5">
+            {titleField && titleField.type === "boolean" ? (
+              <p
+                className={cn(
+                  "truncate pr-6 text-base font-semibold",
+                  data[titleField.id] === true
+                    ? "text-success"
+                    : "text-muted-foreground"
+                )}
+              >
+                {data[titleField.id] === true ? "Да" : "Нет"}
+              </p>
+            ) : (
+              <p
+                className={cn(
+                  "truncate pr-6 text-base font-semibold text-foreground",
+                  titleField && titleText.length > TEXT_PREVIEW_LIMIT && "pr-0"
+                )}
+                title={titleText}
+              >
+                {titleText.length > TEXT_PREVIEW_LIMIT
+                  ? `${titleText.slice(0, TEXT_PREVIEW_LIMIT).trimEnd()}…`
+                  : titleText}
+              </p>
+            )}
+            {titleField && titleField.type !== "boolean" && (
+              <p className="truncate text-xs text-muted-foreground">
+                {titleField.label}
+              </p>
+            )}
+          </div>
 
-          if (isImage) {
+          {rest.length > 0 && (
+            <div className="divide-y divide-border border-t border-border">
+              {rest.map((field) => {
+                const raw = data[field.id];
+                const isBoolean = field.type === "boolean";
+                const text = formatFieldValue(raw);
+                // Бывает, что в поле вписали его же название («Сумма» = «Сумма»).
+                const sameAsLabel =
+                  text.trim().toLowerCase() === field.label.trim().toLowerCase();
+                const value =
+                  field.type === "textarea" && text.length > TEXT_PREVIEW_LIMIT
+                    ? `${text.slice(0, TEXT_PREVIEW_LIMIT).trimEnd()}…`
+                    : text;
+
+                return (
+                  <div
+                    key={field.id}
+                    className="flex items-baseline justify-between gap-3 py-1.5"
+                  >
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {field.label}
+                    </span>
+                    {isBoolean ? (
+                      <span
+                        className={cn(
+                          "min-w-0 truncate text-right text-sm font-medium",
+                          raw === true ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {raw === true ? "Да" : "Нет"}
+                      </span>
+                    ) : (
+                      <span
+                        className={cn(
+                          "min-w-0 truncate text-right text-sm font-medium text-foreground",
+                          sameAsLabel && "text-muted-foreground"
+                        )}
+                        title={text}
+                      >
+                        {value}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {images.map((field) => {
+            const raw = data[field.id];
             const src =
-              signedUrl ??
+              imageUrls?.[field.id] ??
               (typeof raw === "string" && raw.startsWith("http")
                 ? raw
                 : undefined);
@@ -108,67 +201,20 @@ export function RecordCard({
             ) : (
               <div
                 key={field.id}
-                className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1.5 text-xs text-muted-foreground"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground"
               >
-                <ClipboardCopy className="h-3.5 w-3.5" />
-                {field.label}: файл не загружен
+                <ClipboardCopy className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{field.label}: файл не загружен</span>
               </div>
             );
-          }
+          })}
 
-          if (field.type === "boolean") {
-            return (
-              <div
-                key={field.id}
-                className="flex items-baseline justify-between gap-3"
-              >
-                {!sameAsLabel && (
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {field.label}
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    "min-w-0 truncate text-sm font-medium",
-                    raw === true
-                      ? "text-success"
-                      : "text-muted-foreground",
-                    !sameAsLabel && "text-right"
-                  )}
-                >
-                  {raw === true ? "Да" : "Нет"}
-                </span>
-              </div>
-            );
-          }
-
-          const truncated =
-            field.type === "textarea" && text.length > TEXT_PREVIEW_LIMIT
-              ? `${text.slice(0, TEXT_PREVIEW_LIMIT).trimEnd()}…`
-              : text;
-
-          return (
-            <div
-              key={field.id}
-              className="flex items-baseline justify-between gap-3"
-            >
-              {!sameAsLabel && (
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {field.label}
-                </span>
-              )}
-              <span
-                className={cn(
-                  "min-w-0 truncate text-sm font-medium text-foreground",
-                  !sameAsLabel && "text-right"
-                )}
-                title={text}
-              >
-                {truncated}
-              </span>
-            </div>
-          );
-        })
+          {createdAt && (
+            <p className="mt-auto border-t border-border pt-2 text-xs text-muted-foreground">
+              {formatDay(createdAt)}
+            </p>
+          )}
+        </>
       )}
     </Surface>
   );
