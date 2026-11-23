@@ -91,6 +91,46 @@ const FieldTextarea = React.forwardRef<
 ));
 FieldTextarea.displayName = "FieldTextarea";
 
+/**
+ * Флажок в рамке — «Да/Нет» в форме записи и в предпросмотре.
+ *
+ * Обёртка `label` сама связывает подпись с флажком, поэтому `Field` не
+ * проставляет ей id (см. проверку типа ребёнка ниже): id уходит внутрь,
+ * на сам <input>.
+ */
+const FieldCheck = React.forwardRef<
+  HTMLInputElement,
+  Omit<React.ComponentProps<"input">, "size"> &
+    ControlVariantProps & {
+      /** Текст рядом с флажком. */
+      text: React.ReactNode;
+      /** Классы самой подложки, а не флажка. */
+      containerClassName?: string;
+    }
+>(({ className, size, invalid, text, containerClassName, ...props }, ref) => (
+  <label
+    className={cn(
+      "flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm text-foreground transition-colors",
+      "focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
+      "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
+      invalid ? "border-danger" : "border-border-strong",
+      containerClassName
+    )}
+  >
+    <input
+      ref={ref}
+      type="checkbox"
+      className={cn(
+        "h-4 w-4 shrink-0 rounded border-border-strong accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className
+      )}
+      {...props}
+    />
+    <span>{text}</span>
+  </label>
+));
+FieldCheck.displayName = "FieldCheck";
+
 type FieldProps = {
   /** id контрола — связывает подпись и описание с полем. */
   id: string;
@@ -177,6 +217,7 @@ export function Field({
 }
 
 export {
+  FieldCheck,
   FieldInput,
   FieldSelect,
   FieldTextarea,

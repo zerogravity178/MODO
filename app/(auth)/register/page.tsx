@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldInput } from "@/components/ui/field";
+import { Notice } from "@/components/ui/notice";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
@@ -62,10 +62,8 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
+          <Field id="email" label="Email">
+            <FieldInput
               name="email"
               type="email"
               autoComplete="email"
@@ -73,14 +71,11 @@ export default function RegisterPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="focus-visible:ring-ring"
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Пароль</Label>
-            <Input
-              id="password"
+          <Field id="password" label="Пароль">
+            <FieldInput
               name="password"
               type="password"
               autoComplete="new-password"
@@ -89,29 +84,20 @@ export default function RegisterPage() {
               onChange={(event) => setPassword(event.target.value)}
               minLength={6}
               required
-              className="focus-visible:ring-ring"
             />
-          </div>
+          </Field>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Создаём…" : "Создать аккаунт"}
           </Button>
         </form>
 
-        {error && (
-          <p role="alert" className="mt-4 text-sm text-danger">
-            {error}
-          </p>
-        )}
+        {error && <Notice className="mt-4">{error}</Notice>}
 
         {notice && (
-          <p role="status" className="mt-4 text-sm text-success">
+          <Notice kind="success" className="mt-4">
             {notice}
-          </p>
+          </Notice>
         )}
 
         <p className="mt-6 text-sm text-muted-foreground">

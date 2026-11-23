@@ -7,6 +7,7 @@ import { Copy, Trash2 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { IconBadge } from "@/components/ui/icon-badge";
+import { Notice } from "@/components/ui/notice";
 import { Surface } from "@/components/ui/surface";
 import { plural } from "@/lib/records";
 import { getModuleIcon } from "@/components/module/module-icons";
@@ -171,11 +172,7 @@ export function ModuleCard({
         )}
       </div>
 
-      {error && !confirmOpen && (
-        <p role="alert" className="mt-1 text-xs text-danger">
-          {error}
-        </p>
-      )}
+      {error && !confirmOpen && <Notice className="mt-1 text-xs">{error}</Notice>}
 
       <ConfirmDialog
         open={confirmOpen}

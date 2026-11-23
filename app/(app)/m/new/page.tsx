@@ -3,12 +3,14 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
 
 import { FieldList } from "@/components/constructor/FieldList";
 import { FormPreview } from "@/components/constructor/FormPreview";
+import { ICON_CHOICES, IconPicker } from "@/components/constructor/icon-picker";
+import { PreviewToggle } from "@/components/constructor/preview-toggle";
 import { Button } from "@/components/ui/button";
 import { Field, FieldInput } from "@/components/ui/field";
+import { Notice } from "@/components/ui/notice";
 import {
   describeIssue,
   makeEmptyField,
@@ -17,26 +19,13 @@ import {
   type DraftField,
 } from "@/lib/fields";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
-
-/**
- * Ключи иконок — те же, что понимает getModuleIcon() на карточке модуля.
- * Если сохранить эмодзи как есть, карточка покажет серую заглушку.
- */
-const ICON_CHOICES: { emoji: string; icon: string; title: string }[] = [
-  { emoji: "📦", icon: "box", title: "Коробка" },
-  { emoji: "💰", icon: "wallet", title: "Деньги" },
-  { emoji: "⌚", icon: "watch", title: "Часы" },
-  { emoji: "✅", icon: "check-square", title: "Задачи" },
-  { emoji: "📋", icon: "clipboard-list", title: "Список" },
-];
 
 export default function NewModulePage() {
   const router = useRouter();
 
   const nextKey = useRef(1);
   const [name, setName] = useState("");
-  const [icon, setIcon] = useState(ICON_CHOICES[0].icon);
+  const [icon, setIcon] = useState(ICON_CHOICES[0].key);
   const [fields, setFields] = useState<DraftField[]>(() => [
     makeEmptyField(0),
   ]);
@@ -156,30 +145,7 @@ export default function NewModulePage() {
           <span className="text-sm font-medium leading-none text-foreground">
             Иконка
           </span>
-          <div className="flex flex-wrap gap-2">
-            {ICON_CHOICES.map((choice) => {
-              const selected = icon === choice.icon;
-
-              return (
-                <button
-                  key={choice.icon}
-                  type="button"
-                  title={choice.title}
-                  aria-label={choice.title}
-                  aria-pressed={selected}
-                  onClick={() => setIcon(choice.icon)}
-                  className={cn(
-                    "flex h-12 w-12 items-center justify-center rounded-xl border text-2xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    selected
-                      ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                      : "border-border bg-card hover:border-primary"
-                  )}
-                >
-                  <span aria-hidden>{choice.emoji}</span>
-                </button>
-              );
-            })}
-          </div>
+          <IconPicker value={icon} onChange={setIcon} size="md" />
         </section>
 
         <FieldList
@@ -191,36 +157,18 @@ export default function NewModulePage() {
         />
 
         <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowPreview((current) => !current)}
-            aria-expanded={showPreview}
-            className="w-full sm:w-auto"
-          >
-            {showPreview ? (
-              <EyeOff className="mr-1 h-4 w-4" />
-            ) : (
-              <Eye className="mr-1 h-4 w-4" />
-            )}
-            {showPreview ? "Скрыть предпросмотр" : "Предпросмотр формы"}
-          </Button>
+          <PreviewToggle
+            open={showPreview}
+            onToggle={() => setShowPreview((current) => !current)}
+          />
 
           {showPreview && <FormPreview fields={fields} />}
         </div>
 
-        {error && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
+        {error && <Notice>{error}</Notice>}
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            type="submit"
-            disabled={saving}
-            className="bg-primary text-primary-foreground hover:bg-primary-hover"
-          >
+          <Button type="submit" disabled={saving}>
             {saving ? "Создаём…" : "Создать модуль"}
           </Button>
           <Button type="button" variant="outline" asChild>

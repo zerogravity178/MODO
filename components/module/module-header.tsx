@@ -70,10 +70,7 @@ export function ModuleHeader({
             </Link>
           </Button>
 
-          <Button
-            onClick={onCreate}
-            className="bg-primary text-primary-foreground hover:bg-primary-hover"
-          >
+          <Button onClick={onCreate}>
             <Plus className="mr-1 h-4 w-4" />
             Добавить
           </Button>

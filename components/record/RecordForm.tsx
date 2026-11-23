@@ -6,10 +6,12 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldCheck,
   FieldInput,
   FieldSelect,
   FieldTextarea,
 } from "@/components/ui/field";
+import { Notice } from "@/components/ui/notice";
 import {
   IMAGE_BUCKET,
   SIGNED_URL_TTL_SECONDS,
@@ -323,22 +325,15 @@ export function RecordForm({
                 ))}
               </FieldSelect>
             ) : field.type === "boolean" ? (
-              <label
-                htmlFor={inputId}
-                className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-border-strong bg-card px-3 py-2 text-sm text-foreground transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background"
-              >
-                <input
-                  id={inputId}
-                  name={field.id}
-                  type="checkbox"
-                  checked={value === "true"}
-                  onChange={(event) =>
-                    setValue(field.id, event.target.checked ? "true" : "")
-                  }
-                  className="h-4 w-4 rounded border-border-strong accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-                {value === "true" ? "Да" : "Отметить, если да"}
-              </label>
+              <FieldCheck
+                id={inputId}
+                name={field.id}
+                checked={value === "true"}
+                onChange={(event) =>
+                  setValue(field.id, event.target.checked ? "true" : "")
+                }
+                text={value === "true" ? "Да" : "Отметить, если да"}
+              />
             ) : field.type === "textarea" ? (
               <FieldTextarea
                 id={inputId}
@@ -441,18 +436,10 @@ export function RecordForm({
         );
       })}
 
-      {error && (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      )}
+      {error && <Notice>{error}</Notice>}
 
       <div className="flex gap-2 pt-2">
-        <Button
-          type="submit"
-          disabled={saving}
-          className="bg-primary text-primary-foreground hover:bg-primary-hover"
-        >
+        <Button type="submit" disabled={saving}>
           {saving ? "Сохраняем…" : isEdit ? "Сохранить" : "Добавить"}
         </Button>
         {onCancel && (

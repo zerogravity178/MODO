@@ -1,11 +1,11 @@
 "use client";
 
 import {
+  FieldCheck,
   FieldInput,
   FieldSelect,
   FieldTextarea,
 } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
 import { Surface } from "@/components/ui/surface";
 import type { DraftField } from "@/lib/fields";
 import { FIELD_TYPES } from "@/lib/types";
@@ -39,10 +39,10 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
         return (
           <div key={field.key} className="space-y-1.5">
             <div className="flex items-baseline justify-between gap-2">
-              <Label className="text-sm">
+              <span className="text-sm font-medium leading-none text-foreground">
                 {label}
                 {field.required && <span className="ml-0.5 text-primary">*</span>}
-              </Label>
+              </span>
               <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
                 {typeLabel(field.type)}
               </span>
@@ -53,15 +53,12 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
                 <option>— не выбрано —</option>
               </FieldSelect>
             ) : field.type === "boolean" ? (
-              <div className="flex min-h-9 items-center gap-2 rounded-md border border-border-strong px-3 text-sm text-muted-foreground">
-                <input
-                  type="checkbox"
-                  disabled
-                  aria-label={label}
-                  className="h-4 w-4 rounded border-border-strong accent-primary"
-                />
-                Да
-              </div>
+              <FieldCheck
+                disabled
+                aria-label={label}
+                text="Да"
+                containerClassName="min-h-9 text-sm text-muted-foreground"
+              />
             ) : field.type === "textarea" ? (
               <FieldTextarea
                 disabled
@@ -70,9 +67,12 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
                 className="min-h-16"
               />
             ) : field.type === "image" ? (
-              <div className="flex h-10 items-center rounded-md border border-dashed border-border-strong px-3 text-sm text-muted-foreground">
-                Картинка или ссылка
-              </div>
+              <FieldInput
+                disabled
+                aria-label={label}
+                placeholder="Картинка или ссылка"
+                className="border-dashed"
+              />
             ) : (
               <FieldInput
                 disabled

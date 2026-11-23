@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Notice } from "@/components/ui/notice";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -42,11 +43,7 @@ export function ConfirmDialog({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        {error && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
+        {error && <Notice>{error}</Notice>}
 
         <DialogFooter className="gap-2">
           <Button
@@ -59,9 +56,9 @@ export function ConfirmDialog({
           </Button>
           <Button
             type="button"
+            variant="destructive"
             onClick={onConfirm}
             disabled={pending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {pending ? pendingLabel : confirmLabel}
           </Button>

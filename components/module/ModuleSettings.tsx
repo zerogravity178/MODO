@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
 
 import { FieldList } from "@/components/constructor/FieldList";
 import { FormPreview } from "@/components/constructor/FormPreview";
+import { IconPicker } from "@/components/constructor/icon-picker";
+import { PreviewToggle } from "@/components/constructor/preview-toggle";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { deleteModuleWithImages } from "@/app/(app)/image-actions";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field, FieldInput } from "@/components/ui/field";
 import { IconBadge } from "@/components/ui/icon-badge";
+import { Notice } from "@/components/ui/notice";
 import { Surface } from "@/components/ui/surface";
 import {
   describeIssue,
@@ -33,14 +35,6 @@ type ModuleSettingsProps = {
   records: RecordRow[];
   imageCount: number;
 };
-
-const ICON_CHOICES: { key: string; emoji: string; label: string }[] = [
-  { key: "box", emoji: "📦", label: "Коробка" },
-  { key: "wallet", emoji: "💰", label: "Деньги" },
-  { key: "watch", emoji: "⌚", label: "Часы" },
-  { key: "check-square", emoji: "✅", label: "Задачи" },
-  { key: "clipboard-list", emoji: "📋", label: "Список" },
-];
 
 export function ModuleSettings({
   module,
@@ -228,27 +222,13 @@ export function ModuleSettings({
             <span className="text-sm font-medium leading-none text-foreground">
               Иконка
             </span>
-            <div className="flex flex-wrap gap-2">
-              {ICON_CHOICES.map((choice) => (
-                <button
-                  key={choice.key}
-                  type="button"
-                  onClick={() => {
-                    setIcon(choice.key);
-                    setSaved(false);
-                  }}
-                  aria-pressed={icon === choice.key}
-                  title={choice.label}
-                  className={
-                    icon === choice.key
-                      ? "h-10 w-10 rounded-lg border-2 border-primary bg-primary/10 text-lg"
-                      : "h-10 w-10 rounded-lg border border-border bg-card text-lg transition hover:border-primary"
-                  }
-                >
-                  {choice.emoji}
-                </button>
-              ))}
-            </div>
+            <IconPicker
+              value={icon}
+              onChange={(key) => {
+                setIcon(key);
+                setSaved(false);
+              }}
+            />
           </div>
         </section>
 
@@ -264,20 +244,10 @@ export function ModuleSettings({
         />
 
         <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowPreview((current) => !current)}
-            aria-expanded={showPreview}
-            className="w-full sm:w-auto"
-          >
-            {showPreview ? (
-              <EyeOff className="mr-1 h-4 w-4" />
-            ) : (
-              <Eye className="mr-1 h-4 w-4" />
-            )}
-            {showPreview ? "Скрыть предпросмотр" : "Предпросмотр формы"}
-          </Button>
+          <PreviewToggle
+            open={showPreview}
+            onToggle={() => setShowPreview((current) => !current)}
+          />
 
           {showPreview && <FormPreview fields={drafts} />}
         </div>
@@ -289,23 +259,11 @@ export function ModuleSettings({
           </p>
         )}
 
-        {error && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
+        {error && <Notice>{error}</Notice>}
 
-        {saved && (
-          <p role="status" className="text-sm text-success">
-            Сохранено
-          </p>
-        )}
+        {saved && <Notice kind="success">Сохранено</Notice>}
 
-        <Button
-          type="submit"
-          disabled={saving}
-          className="bg-primary text-primary-foreground hover:bg-primary-hover"
-        >
+        <Button type="submit" disabled={saving}>
           {saving ? "Сохраняем…" : "Сохранить"}
         </Button>
       </form>
