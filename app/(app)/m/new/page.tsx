@@ -8,8 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { FieldList } from "@/components/constructor/FieldList";
 import { FormPreview } from "@/components/constructor/FormPreview";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldInput } from "@/components/ui/field";
 import {
   describeIssue,
   makeEmptyField,
@@ -143,20 +142,20 @@ export default function NewModulePage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <section className="space-y-2">
-          <Label htmlFor="module-name">Название модуля</Label>
-          <Input
+        <Field id="module-name" label="Название модуля">
+          <FieldInput
             id="module-name"
             value={name}
             autoFocus
             placeholder="Например, Расходы"
             onChange={(event) => setName(event.target.value)}
-            className="focus-visible:ring-ring"
           />
-        </section>
+        </Field>
 
         <section className="space-y-2">
-          <Label>Иконка</Label>
+          <span className="text-sm font-medium leading-none text-foreground">
+            Иконка
+          </span>
           <div className="flex flex-wrap gap-2">
             {ICON_CHOICES.map((choice) => {
               const selected = icon === choice.icon;

@@ -5,6 +5,8 @@ import { Plus } from "lucide-react";
 import { ModuleCard } from "@/components/module/ModuleCard";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { Button } from "@/components/ui/button";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { Surface } from "@/components/ui/surface";
 import { createClient } from "@/lib/supabase/server";
 
 import { createModuleFromTemplate } from "./actions";
@@ -114,14 +116,13 @@ export default async function HomePage() {
               const Icon = getModuleIcon(template.icon);
 
               return (
-                <div
+                <Surface
                   key={template.id}
-                  className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+                  padding="md"
+                  className="flex flex-col gap-4"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
-                    </span>
+                    <IconBadge icon={Icon} size="sm" />
                     <p className="truncate font-medium text-foreground">
                       {template.name}
                     </p>
@@ -136,16 +137,20 @@ export default async function HomePage() {
                       Использовать
                     </Button>
                   </form>
-                </div>
+                </Surface>
               );
             })}
           </div>
 
           {templates.length === 0 && (
-            <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+            <Surface
+              variant="dashed"
+              padding="md"
+              className="text-sm text-muted-foreground"
+            >
               Шаблоны не загружены. Выполните `002_seed_templates.sql` в Supabase
               SQL Editor.
-            </p>
+            </Surface>
           )}
 
           <Button

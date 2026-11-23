@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldInput,
+  FieldSelect,
+  FieldTextarea,
+} from "@/components/ui/field";
 import {
   IMAGE_BUCKET,
   SIGNED_URL_TTL_SECONDS,
@@ -298,21 +302,18 @@ export function RecordForm({
             : "";
 
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={inputId}>
-              {field.label}
-              {field.required && (
-                <span className="ml-0.5 text-primary">*</span>
-              )}
-            </Label>
-
+          <Field
+            key={field.id}
+            id={inputId}
+            label={field.label}
+            required={field.required}
+          >
             {field.type === "select" ? (
-              <select
+              <FieldSelect
                 id={inputId}
                 name={field.id}
                 value={value}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="flex h-10 w-full rounded-md border border-border-strong bg-card px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm"
               >
                 <option value="">— не выбрано —</option>
                 {(field.options ?? []).map((option) => (
@@ -320,11 +321,11 @@ export function RecordForm({
                     {option}
                   </option>
                 ))}
-              </select>
+              </FieldSelect>
             ) : field.type === "boolean" ? (
               <label
                 htmlFor={inputId}
-                className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-border-strong px-3 py-2 text-sm text-foreground"
+                className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-border-strong bg-card px-3 py-2 text-sm text-foreground transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background"
               >
                 <input
                   id={inputId}
@@ -339,18 +340,17 @@ export function RecordForm({
                 {value === "true" ? "Да" : "Отметить, если да"}
               </label>
             ) : field.type === "textarea" ? (
-              <textarea
+              <FieldTextarea
                 id={inputId}
                 name={field.id}
                 value={value}
                 rows={4}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="flex w-full resize-y rounded-md border border-border-strong bg-card px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:text-foreground sm:text-sm"
               />
             ) : field.type === "image" ? (
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
+                  <FieldInput
                     id={inputId}
                     name={field.id}
                     type="url"
@@ -358,7 +358,6 @@ export function RecordForm({
                     placeholder="https://... или загрузите файл"
                     value={isStoragePath(value) ? "" : value}
                     onChange={(event) => setValue(field.id, event.target.value)}
-                    className="focus-visible:ring-ring"
                   />
                   <input
                     ref={(element) => {
@@ -426,7 +425,7 @@ export function RecordForm({
                 )}
               </div>
             ) : (
-              <Input
+              <FieldInput
                 id={inputId}
                 name={field.id}
                 // Число — обычный текст с цифровой клавиатурой: браузерный
@@ -436,10 +435,9 @@ export function RecordForm({
                 inputMode={field.type === "number" ? "decimal" : undefined}
                 value={value}
                 onChange={(event) => setValue(field.id, event.target.value)}
-                className="focus-visible:ring-ring"
               />
             )}
-          </div>
+          </Field>
         );
       })}
 

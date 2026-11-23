@@ -1,12 +1,14 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import {
+  FieldInput,
+  FieldSelect,
+  FieldTextarea,
+} from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import { Surface } from "@/components/ui/surface";
 import type { DraftField } from "@/lib/fields";
 import { FIELD_TYPES } from "@/lib/types";
-
-const selectClass =
-  "flex h-10 w-full rounded-md border border-border-strong bg-card px-3 py-2 text-base text-muted-foreground sm:h-9 sm:text-sm";
 
 function typeLabel(type: DraftField["type"]): string {
   return FIELD_TYPES.find((item) => item.value === type)?.label ?? type;
@@ -19,14 +21,18 @@ function typeLabel(type: DraftField["type"]): string {
 export function FormPreview({ fields }: { fields: DraftField[] }) {
   if (fields.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+      <Surface
+        variant="dashed"
+        padding="md"
+        className="text-sm text-muted-foreground"
+      >
         Добавьте поля — здесь появится форма записи.
-      </p>
+      </Surface>
     );
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-surface/60 p-3 dark:bg-card/40">
+    <Surface variant="subtle" padding="sm" className="space-y-3">
       {fields.map((field, index) => {
         const label = field.label.trim() || `Поле ${index + 1}`;
 
@@ -35,9 +41,7 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
             <div className="flex items-baseline justify-between gap-2">
               <Label className="text-sm">
                 {label}
-                {field.required && (
-                  <span className="ml-0.5 text-primary">*</span>
-                )}
+                {field.required && <span className="ml-0.5 text-primary">*</span>}
               </Label>
               <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
                 {typeLabel(field.type)}
@@ -45,9 +49,9 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
             </div>
 
             {field.type === "select" ? (
-              <select className={selectClass} disabled aria-label={label}>
+              <FieldSelect disabled aria-label={label}>
                 <option>— не выбрано —</option>
-              </select>
+              </FieldSelect>
             ) : field.type === "boolean" ? (
               <div className="flex min-h-9 items-center gap-2 rounded-md border border-border-strong px-3 text-sm text-muted-foreground">
                 <input
@@ -59,15 +63,18 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
                 Да
               </div>
             ) : field.type === "textarea" ? (
-              <div className="min-h-16 rounded-md border border-border-strong bg-card px-3 py-2 text-sm text-muted-foreground">
-                Длинный текст
-              </div>
+              <FieldTextarea
+                disabled
+                aria-label={label}
+                placeholder="Длинный текст"
+                className="min-h-16"
+              />
             ) : field.type === "image" ? (
               <div className="flex h-10 items-center rounded-md border border-dashed border-border-strong px-3 text-sm text-muted-foreground">
                 Картинка или ссылка
               </div>
             ) : (
-              <Input
+              <FieldInput
                 disabled
                 aria-label={label}
                 placeholder={
@@ -77,7 +84,6 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
                       ? "дд.мм.гггг"
                       : "Значение"
                 }
-                className="cursor-not-allowed bg-card"
               />
             )}
           </div>
@@ -92,7 +98,7 @@ export function FormPreview({ fields }: { fields: DraftField[] }) {
           Отмена
         </span>
       </div>
-    </div>
+    </Surface>
   );
 }
 

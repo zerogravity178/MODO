@@ -2,8 +2,8 @@
 
 import { ArrowDown, ArrowUp, X } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldInput, FieldSelect } from "@/components/ui/field";
+import { Surface } from "@/components/ui/surface";
 import type { DraftField } from "@/lib/fields";
 import { FIELD_TYPES, type FieldType } from "@/lib/types";
 
@@ -34,7 +34,7 @@ export function FieldRow({
   const requiredId = `field-required-${field.key}`;
 
   return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+    <Surface padding="sm" className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Поле {index + 1}
@@ -73,66 +73,57 @@ export function FieldRow({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[1fr_9rem]">
-        <div className="space-y-1">
-          <Label
-            htmlFor={labelId}
-            className="text-xs font-normal text-muted-foreground"
-          >
-            Название
-          </Label>
-          <Input
+        <Field
+          id={labelId}
+          label="Название"
+          labelClassName="text-xs font-normal text-muted-foreground"
+        >
+          <FieldInput
             id={labelId}
             value={field.label}
             placeholder="Например, Сумма"
             onChange={(event) =>
               onChange(field.key, { label: event.target.value })
             }
-            className="focus-visible:ring-ring"
           />
-        </div>
+        </Field>
 
-        <div className="space-y-1">
-          <Label
-            htmlFor={typeId}
-            className="text-xs font-normal text-muted-foreground"
-          >
-            Тип
-          </Label>
-          <select
+        <Field
+          id={typeId}
+          label="Тип"
+          labelClassName="text-xs font-normal text-muted-foreground"
+        >
+          <FieldSelect
             id={typeId}
             value={field.type}
             onChange={(event) =>
               onChange(field.key, { type: event.target.value as FieldType })
             }
-            className="flex h-10 w-full rounded-md border border-border-strong bg-card px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:text-sm"
           >
             {FIELD_TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
-          </select>
-        </div>
+          </FieldSelect>
+        </Field>
       </div>
 
       {field.type === "select" && (
-        <div className="space-y-1">
-          <Label
-            htmlFor={optionsId}
-            className="text-xs font-normal text-muted-foreground"
-          >
-            Варианты через запятую
-          </Label>
-          <Input
+        <Field
+          id={optionsId}
+          label="Варианты через запятую"
+          labelClassName="text-xs font-normal text-muted-foreground"
+        >
+          <FieldInput
             id={optionsId}
             value={field.optionsText}
             placeholder="Еда, Транспорт, Жильё"
             onChange={(event) =>
               onChange(field.key, { optionsText: event.target.value })
             }
-            className="focus-visible:ring-ring"
           />
-        </div>
+        </Field>
       )}
 
       <label
@@ -150,7 +141,7 @@ export function FieldRow({
         />
         Обязательное
       </label>
-    </div>
+    </Surface>
   );
 }
 

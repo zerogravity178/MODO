@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 
 import { FieldRow } from "@/components/constructor/FieldRow";
 import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/surface";
 import {
   moveItem,
   type DraftField,
@@ -44,9 +45,13 @@ export function FieldList({
       </div>
 
       {fields.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+        <Surface
+          variant="dashed"
+          padding="md"
+          className="text-sm text-muted-foreground"
+        >
           Пока нет полей — добавьте хотя бы одно.
-        </p>
+        </Surface>
       ) : (
         <div className="space-y-2">
           {fields.map((field, index) => (

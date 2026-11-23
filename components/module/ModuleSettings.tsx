@@ -12,8 +12,9 @@ import { deleteModuleWithImages } from "@/app/(app)/image-actions";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldInput } from "@/components/ui/field";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { Surface } from "@/components/ui/surface";
 import {
   describeIssue,
   makeEmptyField,
@@ -199,9 +200,7 @@ export function ModuleSettings({
         </Link>
 
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Icon className="h-5 w-5" />
-          </span>
+          <IconBadge icon={Icon} size="md" />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-semibold text-foreground">
               Настройки
@@ -215,21 +214,20 @@ export function ModuleSettings({
 
       <form onSubmit={handleSave} className="space-y-8">
         <section className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="module-name">Название модуля</Label>
-            <Input
-              id="module-name"
+          <Field id="module-name" label="Название модуля">
+            <FieldInput
               value={name}
               onChange={(event) => {
                 setName(event.target.value);
                 setSaved(false);
               }}
-              className="focus-visible:ring-ring"
             />
-          </div>
+          </Field>
 
           <div className="space-y-2">
-            <Label>Иконка</Label>
+            <span className="text-sm font-medium leading-none text-foreground">
+              Иконка
+            </span>
             <div className="flex flex-wrap gap-2">
               {ICON_CHOICES.map((choice) => (
                 <button
@@ -285,7 +283,7 @@ export function ModuleSettings({
         </div>
 
         {initialFields.length > 0 && (
-          <p className="rounded-lg bg-surface px-3 py-2 text-xs text-muted-foreground dark:bg-card">
+          <p className="rounded-lg bg-surface px-3 py-2 text-xs text-muted-foreground">
             Удаление поля не стирает уже сохранённые значения — они просто
             перестают показываться.
           </p>
@@ -312,11 +310,9 @@ export function ModuleSettings({
         </Button>
       </form>
 
-      <section className="space-y-3 rounded-xl border border-border p-4">
+      <Surface padding="md" className="space-y-3">
         <div className="space-y-1">
-          <h2 className="font-semibold text-foreground">
-            Экспорт
-          </h2>
+          <h2 className="font-semibold text-foreground">Экспорт</h2>
           <p className="text-sm text-muted-foreground">
             {records.length === 0
               ? "В модуле пока нет записей."
@@ -349,13 +345,11 @@ export function ModuleSettings({
             Скачать CSV
           </Button>
         </div>
-      </section>
+      </Surface>
 
-      <section className="space-y-3 rounded-xl border border-danger/30 bg-danger/10 p-4">
+      <Surface variant="danger" padding="md" className="space-y-3">
         <div className="space-y-1">
-          <h2 className="font-semibold text-foreground">
-            Удаление модуля
-          </h2>
+          <h2 className="font-semibold text-foreground">Удаление модуля</h2>
           <p className="text-sm text-muted-foreground">
             Модуль и все записи внутри будут удалены безвозвратно.
           </p>
@@ -372,7 +366,7 @@ export function ModuleSettings({
         >
           Удалить модуль
         </Button>
-      </section>
+      </Surface>
 
       <ConfirmDialog
         open={confirmOpen}

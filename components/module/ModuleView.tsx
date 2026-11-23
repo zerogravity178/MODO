@@ -28,6 +28,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FieldInput, FieldSelect } from "@/components/ui/field";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { Surface } from "@/components/ui/surface";
 import { deleteRecordWithImages } from "@/app/(app)/image-actions";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -57,9 +60,6 @@ type ModuleViewProps = {
   /** recordId → fieldId → подписанная ссылка на картинку из Storage. */
   imageUrls?: Record<string, Record<string, string>>;
 };
-
-const selectClass =
-  "flex h-10 w-full rounded-md border border-border-strong bg-card px-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:text-sm";
 
 /** Поля, по которым имеет смысл фильтровать: мало вариантов, легко выбрать. */
 function filterableFields(fields: FieldDef[]): FieldDef[] {
@@ -177,9 +177,7 @@ export function ModuleView({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Icon className="h-5 w-5" />
-            </span>
+            <IconBadge icon={Icon} size="md" />
             <div className="min-w-0">
               <h1 className="truncate text-2xl font-semibold text-foreground">
                 {module.name}
@@ -243,13 +241,14 @@ export function ModuleView({
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <FieldInput
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Поиск по записям"
                   aria-label="Поиск по записям"
-                  className="h-10 w-full rounded-md border border-border-strong bg-card pl-9 pr-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-9 sm:text-sm"
+                  size="compact"
+                  className="pl-9 pr-2"
                 />
               </div>
 
@@ -276,19 +275,21 @@ export function ModuleView({
             </div>
 
             {panelOpen && (
-              <div
+              <Surface
                 id="filters-panel"
-                className="space-y-3 rounded-xl border border-border p-3"
+                variant="plain"
+                padding="sm"
+                className="space-y-3"
               >
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="space-y-1">
                     <span className="text-xs text-muted-foreground">
                       Сортировка
                     </span>
-                    <select
+                    <FieldSelect
                       value={sortKey}
                       onChange={(event) => setSortKey(event.target.value)}
-                      className={selectClass}
+                      size="compact"
                     >
                       <option value="__created_at__">По дате создания</option>
                       {fields.map((field) => (
@@ -296,7 +297,7 @@ export function ModuleView({
                           {field.label}
                         </option>
                       ))}
-                    </select>
+                    </FieldSelect>
                   </label>
 
                   <div className="space-y-1">
@@ -325,7 +326,7 @@ export function ModuleView({
                         <span className="text-xs text-muted-foreground">
                           {field.label}
                         </span>
-                        <select
+                        <FieldSelect
                           value={filters[field.id] ?? ""}
                           onChange={(event) =>
                             setFilters((current) => ({
@@ -333,7 +334,7 @@ export function ModuleView({
                               [field.id]: event.target.value,
                             }))
                           }
-                          className={selectClass}
+                          size="compact"
                         >
                           <option value="">Любое</option>
                           {filterValues(items, field).map((value) => (
@@ -342,7 +343,7 @@ export function ModuleView({
                             </option>
                           ))}
                           <option value="__empty__">Пустые</option>
-                        </select>
+                        </FieldSelect>
                       </label>
                     ))}
                   </div>
@@ -356,7 +357,7 @@ export function ModuleView({
                   <X className="h-3.5 w-3.5" />
                   Сбросить
                 </button>
-              </div>
+              </Surface>
             )}
 
             {filtersActive && (
@@ -495,9 +496,13 @@ function RecordTable({
   onDelete,
 }: RecordTableProps) {
   return (
-    <div className="relative overflow-x-auto rounded-xl border border-border">
+    <Surface
+      variant="plain"
+      padding="none"
+      className="relative overflow-x-auto"
+    >
       <table className="w-full border-collapse text-sm">
-        <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground dark:bg-card">
+        <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             {fields.map((field) => (
               <th key={field.id} className="px-3 py-2 font-medium">
@@ -515,7 +520,7 @@ function RecordTable({
             <tr
               key={record.id}
               onClick={() => onEdit(record)}
-              className="group cursor-pointer border-t border-border align-middle transition hover:bg-accent dark:hover:bg-secondary"
+              className="group cursor-pointer border-t border-border align-middle transition hover:bg-accent"
             >
               {fields.map((field) => {
                 const value = data[field.id];
@@ -564,7 +569,7 @@ function RecordTable({
                   }}
                   aria-label="Удалить запись"
                   title="Удалить запись"
-                  className="rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 dark:hover:bg-danger/15 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
+                  className="rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -573,7 +578,7 @@ function RecordTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </Surface>
   );
 }
 

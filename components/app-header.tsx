@@ -55,7 +55,7 @@ export function AppHeader() {
             disabled={leaving}
             aria-label="Выйти из аккаунта"
             title="Выйти"
-            className="rounded-md p-2 text-muted-foreground transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 dark:hover:bg-danger/15"
+            className="rounded-md p-2 text-muted-foreground transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             <LogOut className="h-4 w-4" />
           </button>

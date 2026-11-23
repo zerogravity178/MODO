@@ -2,6 +2,7 @@
 
 import { ClipboardCopy, Trash2 } from "lucide-react";
 
+import { Surface } from "@/components/ui/surface";
 import { formatFieldValue, isBlankValue, type FieldDef } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -36,9 +37,10 @@ export function RecordCard({
     .slice(0, PREVIEW_LIMIT);
 
   return (
-    <div
+    <Surface
+      interactive
       className={cn(
-        "group relative space-y-2 rounded-xl border border-border bg-card p-4 transition hover:border-primary/50 hover:shadow-sm",
+        "group relative space-y-2",
         onDelete && "pr-10",
         onEdit && "cursor-pointer",
         className
@@ -67,7 +69,7 @@ export function RecordCard({
           }}
           aria-label="Удалить запись"
           title="Удалить запись"
-          className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 dark:hover:bg-danger/15 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
+          className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground opacity-0 transition hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 [@media(hover:none)]:p-2.5 [@media(hover:none)]:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -168,7 +170,7 @@ export function RecordCard({
           );
         })
       )}
-    </div>
+    </Surface>
   );
 }
 

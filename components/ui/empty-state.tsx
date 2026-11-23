@@ -1,4 +1,6 @@
 import { getModuleIcon } from "@/components/module/module-icons";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { Surface } from "@/components/ui/surface";
 
 type EmptyStateProps = {
   icon?: string | null;
@@ -17,14 +19,14 @@ export function EmptyState({
   const Icon = getModuleIcon(icon ?? "box");
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-surface/60 px-6 py-10 text-center dark:bg-card/40">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
-      </span>
+    <Surface
+      variant="dashed"
+      padding="none"
+      className="flex flex-col items-center gap-3 px-6 py-10 text-center"
+    >
+      <IconBadge icon={Icon} size="empty" />
       <div className="space-y-1">
-        <p className="font-medium text-foreground">
-          {title}
-        </p>
+        <p className="font-medium text-foreground">{title}</p>
         {description && (
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">
             {description}
@@ -32,7 +34,7 @@ export function EmptyState({
         )}
       </div>
       {children}
-    </div>
+    </Surface>
   );
 }
 

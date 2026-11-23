@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Copy, Trash2 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { Surface } from "@/components/ui/surface";
 import { plural } from "@/lib/records";
 import { getModuleIcon } from "@/components/module/module-icons";
 import { deleteModuleWithImages } from "@/app/(app)/image-actions";
@@ -116,27 +118,20 @@ export function ModuleCard({
   }
 
   const card = (
-    <div
-      className={cn(
-        "group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:border-primary/60 hover:shadow-sm",
-        href && "pr-11",
-        className
-      )}
+    <Surface
+      interactive
+      className={cn("group flex items-center gap-4", href && "pr-11", className)}
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
-      </span>
+      <IconBadge icon={Icon} size="md" />
       <div className="min-w-0">
-        <p className="truncate font-medium text-foreground">
-          {name}
-        </p>
+        <p className="truncate font-medium text-foreground">{name}</p>
         <p className="text-xs text-muted-foreground">
           {typeof count === "number"
             ? `${count} ${plural(count, "запись", "записи", "записей")}`
             : "Модуль"}
         </p>
       </div>
-    </div>
+    </Surface>
   );
 
   return (
@@ -169,7 +164,7 @@ export function ModuleCard({
             onClick={openConfirm}
             aria-label={`Удалить модуль «${name}»`}
             title="Удалить модуль"
-            className="rounded-md p-2 text-muted-foreground [@media(hover:none)]:p-2.5 transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-danger/15"
+            className="rounded-md p-2 text-muted-foreground [@media(hover:none)]:p-2.5 transition hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Trash2 className="h-4 w-4" />
           </button>
