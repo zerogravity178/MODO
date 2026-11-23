@@ -23,6 +23,8 @@ export type ModuleRow = {
   fields: unknown;
   default_view: string | null;
   created_at: string | null;
+  /** Вложенный count из `select("*, records(count)")`. */
+  records?: { count: number }[] | null;
 };
 
 export type RecordRow = {
